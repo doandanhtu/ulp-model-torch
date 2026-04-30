@@ -1,0 +1,16 @@
+# Product features
+nlg_period: 48 # months
+age_db_opt_change: 65 # years
+basic_lb_first_consid_period: 60 # months
+topup_lb_first_consid_period: 60 # months
+sb_coi_first_consid_period: 60 # months
+
+# Model assumptions
+ann_ulp_fer: 4.5 # % p.a.
+ann_sh_fer: 4.0 # % p.a.
+ann_fmc_pc: 1.5 # % p.a.
+ann_fme_pc: 0.5 # % p.a.
+ann_vir: 2  # % p.a.
+ann_rdr: 9  # % p.a.
+inf_pc: 3 # % p.a.
+

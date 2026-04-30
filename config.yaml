@@ -1,0 +1,54 @@
+# =============================================================================
+# ULP Model Configuration
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Projection horizon
+# -----------------------------------------------------------------------------
+max_proj_years: 90          # Maximum projection years (policies mature by this age)
+
+# -----------------------------------------------------------------------------
+# Numerical settings
+# -----------------------------------------------------------------------------
+float_precision: float64    # float64 (recommended) or float32
+compute_device: cpu         # cpu or cuda (GPU)
+
+# -----------------------------------------------------------------------------
+# Batch processing
+# -----------------------------------------------------------------------------
+batch_size: 10000           # Policies processed per batch
+output_batch_size: 1000     # Policies per per-policy output file (output_mode: per_policy)
+
+# -----------------------------------------------------------------------------
+# Input paths
+# -----------------------------------------------------------------------------
+policy_inputs_dir: ./policy_inputs    # Directory containing policy CSV / Parquet files
+param_tables_dir: .                   # Directory containing parameter table CSVs and scalar_inputs.yaml
+
+# -----------------------------------------------------------------------------
+# Output settings
+# -----------------------------------------------------------------------------
+output_dir: ./results                 # Directory where output files are written
+
+output_mode: summary
+# Options:
+#   summary     - one aggregated time-series CSV per scenario (fastest)
+#   per_policy  - per-policy scalar outputs + first 24 months of key time series
+#   both        - summary + per_policy
+
+# Subset of time steps to include in output (summary mode only)
+# Options: all  |  a YAML list of integer month indices, e.g. [0, 12, 24, 60, 120, 240]
+output_time_steps: all
+
+# Extra variables to include beyond the default output set (null = defaults only)
+# Provide as a list of variable names from the Part 1/2/3 output dicts, e.g.:
+#   additional_output_vars:
+#     - bav_ab
+#     - g_bav_ab
+additional_output_vars: null
+
+# -----------------------------------------------------------------------------
+# Stochastic / scenario settings
+# -----------------------------------------------------------------------------
+scenario_file: ./scenarios.csv   # CSV with one scenario per row (investment return assumptions)
+n_simulations: 5000              # Number of Monte Carlo simulations (stochastic mode only)
