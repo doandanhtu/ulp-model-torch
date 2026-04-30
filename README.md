@@ -1,6 +1,6 @@
-# ULP GPU-Accelerated Actuarial Model
+# PyTorch based GPU-Accelerated Actuarial Model
 
-PyTorch implementation of Universal Life Policy cash flow projections.
+PyTorch implementation of Universal Life Product cash flow projections.
 
 ## Status
 - [ ] Part 1: PAV Projection
