@@ -72,7 +72,7 @@ def main() -> int:
 
     print(f"ULP Model")
     print(f"  Config          : {config_path}")
-    print(f"  Policy inputs   : {config.policy_inputs_dir}")
+    print(f"  Policy inputs   : {config.policy_inputs_file}")
     print(f"  Param tables    : {config.param_tables_dir}")
     print(f"  Output dir      : {config.output_dir}")
     print(f"  Output mode     : {config.output_mode}")
