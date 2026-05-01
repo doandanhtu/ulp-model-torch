@@ -115,6 +115,7 @@ class DecrementProjection:
             pol.sex,
             pol_year,
             pt.mortality_select_period,
+            pt.mortality_min_age,
             pt.mortality_male,
             pt.mortality_female,
         ) / 1000.0  # convert per mille to probability

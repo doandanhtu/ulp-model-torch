@@ -61,7 +61,8 @@ class ParamTables:
     # ------------------------------------------------------------------
     mortality_male: torch.Tensor    # [121, 5] per mille, row offset=4 (rows age -4 to 116)
     mortality_female: torch.Tensor  # [121, 5] per mille
-    mortality_select_period: int    # S=4
+    mortality_select_period: int    # S, auto-detected from table column count
+    mortality_min_age: int          # minimum age in table; row_offset = -mortality_min_age
 
     # ------------------------------------------------------------------
     # Operational expense

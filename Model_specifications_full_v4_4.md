@@ -212,9 +212,10 @@ Scalar parameters for this section that are not suited to table format are defin
 
 - **Lapse rate (lapse_tbl.csv)**: This should be a table of lapse rate (%), with 2 dimensions of premium frequency and policy years. For example, a table of 11x4 (11 rows and 4 columns). Each row corresponds to the lapse rate of 4 ACP frequency modes for a specific policy year. 
 
-- **Mortality rate (mortality_select_s4_male.csv, mortality_select_s4_female.csv)**:
-
-The model supports 2 types of mortality table: an ultimate mortality table and a select mortality table. The table type is a configurable parameter. Each table is provided separately for male and female lives, and the appropriate table is selected based on the sex of the life insured.
+- **Mortality rate (mortality_select_male.csv, mortality_select_female.csv)**:
+The model supports select-format mortality tables. Each table is provided separately for male and female lives, and the appropriate table is selected based on the sex of the life insured.
+ 
+**Note on ultimate tables:** If users wish to use an ultimate mortality table (age-indexed only), it can be easily converted to select format by providing it as a single-column select table. The selection period will be S=0, and the lookup formula remains unchanged.
 
 **Ultimate table**
 
@@ -246,19 +247,37 @@ For a life entering at age 30 with selection period S = 4:
 
 | **Policy year** | **Row** | **Col** | **Rate read** |
 | --- | --- | --- | --- |
-| 1 | 30 | 0 | q_[30] |
-| 2 | 30 | 1 | q_[30]+1 |
-| 3 | 30 | 2 | q_[30]+2 |
-| 4 | 30 | 3 | q_[30]+3 |
-| 5 | 30 | 4 | q_34 |
-| 6 | 31 | 4 | q_35 |
-| 7 | 32 | 4 | q_36 |
+| 1 | 30 (Age[x] = 30) | 0 | q_[30] (col q[x]) |
+| 2 | 30 (Age[x] = 30) | 1 | q_[30]+1 (col q[x]+1) |
+| 3 | 30 (Age[x] = 30) | 2 | q_[30]+2 (col q[x]+2) |
+| 4 | 30 (Age[x] = 30) | 3 | q_[30]+3 (col q[x]+3) |
+| 5 | 30 (Age[x] = 30) | 4 | q_30+4 (col qx+4) |
+| 6 | 31 (Age[x] = 31) | 4 | q_31+4 (col qx+4) |
+| 7 | 32 (Age[x] = 32) | 4 | q_32+4 (col qx+4) |
 
-**Identification of table type and select period parameter**: The mortality table type and select period are properties of the table and will be encoded in the table filename (e.g., mortality_ultimate_male.csv or mortality_select_s4_male.csv). The model loader should automatically determine the table structure directly from the input. 
-
-The mortality table should be a csv file whose filename starts with “mortality_” and then either “ultimate_” or “select_”. If it is a select table, then it should have “s?_” next where “?” represents the number of selection period and must be a one-digit integer. The last component in the table name should represent the gender which is either “male” or “female”. If the filename doesn’t match the pattern then the model should return the error “no mortality table found”.
-
-**Note that:** The COI table and the mortality table are separate inputs with different lookup keys. The COI table always uses attained age and is always ultimate format. The mortality table may be ultimate (looked up by attained age) or select (looked up by entry age and duration).
+**Selection period parameter:** The selection period S is automatically determined from the table structure (not encoded in the filename).
+ 
+The mortality table should be a CSV file whose filename follows the pattern `mortality_select_[male|female].csv`. The model loader will automatically detect the selection period S from the number of data columns:
+ 
+**S = (total_columns - 1) - 1 = total_columns - 2**
+ 
+Example: A CSV with 6 total columns (1 age + 5 data) has S = 4.
+ 
+**CSV structure:**
+ 
+- **Column 0 (age column):** Row labels named "age[x]", containing the entry age for each row
+  - Integer values covering the required age range
+  - Example select table: -4, -3, -2, ..., 116
+  - Example for ultimate rates with S=0: 0, 1, 2, ..., 120
+- **Columns 1 to N (data columns):** Mortality rates in per mille
+  - Select table: q[x], q[x]+1, q[x]+2, ..., q[x]+S (total: S+1 columns)
+  - Ultimate table as select format (S=0): single data column
+  - Column headers use square brackets except for the final column (which signals convergence to ultimate rates)
+If the filename does not match the pattern `mortality_select_[male|female].csv`, or if both filenames are missing, the model should return the error "no mortality table found".
+ 
+For users experimenting with ultimate mortality rates: provide them in select format with a single data column. The lookup formula remains the same, with S=0 implicitly.
+ 
+**Note:** The COI table and the mortality table are separate inputs with different lookup keys. The COI table always uses attained age and is always ultimate format. The mortality table is always in select format (looked up by entry age and duration), with flexibility in selection period S.
 
 ### The sensitivity table
 
@@ -1730,9 +1749,9 @@ The tables mentioned in 2.2 and 2.3 are described as follows.
 | Allocation charge | alloc_chg_tbl.csv | Allocation charge rate by policy year, for basic and topup premium. Columns: pol_year, basic_prem, topup_prem. Unit: %. The last row in the file applies to that policy year and all subsequent policy years. |
 | Surrender charge | surr_chg_tbl.csv | Surrender charge rate by policy year. Columns: pol_year, sc_rate. Unit: %. The last row in the file applies to that policy year and all subsequent policy years. |
 | Admin charge | admin_chg_tbl.csv | Monthly admin charge parameters. Columns: admin_chg_start, admin_chg_inc, admin_chg_cap. Unit: %. |
-| COI rates | coi_tbl.csv | Annual COI per mille by age and sex. Columns: age, male, female. Unit: per 1000. This COI table supports the maximum attained age at maturity of 98 which corresponds to the maximum policy term of (98 – age at entry). |
+| COI rates | coi_tbl.csv | Annual COI per mille by age and sex. Columns: age, male, female. Unit: per 1000. The COI table supports the maximum attained age at maturity that is equal to the last age in this table. For example, if the last age is 98, it supports the maximum attained age at maturity of 98 which corresponds to the maximum policy term of (98 – age at entry) |
 | Hard guaranteed investment rates | hard_g_inv_tbl.csv | Annual hard guaranteed investment rates by policy year. Columns: pol_year, g_inv. Unit: % p.a. The last row in the file applies to that policy year and all subsequent policy years. |
-| LIEN clause | lien_tbl.csv | The LIEN clause by age. Columns: age, lien_pc. Unit: %. The last row (age = 4) applies to attained age 4 and all subsequent attained ages. |
+| LIEN clause | lien_tbl.csv | The LIEN clause by age. Columns: age, lien_pc. Unit: %. The last row applies to that attained age and all subsequent attained ages. |
 | Basic LB rates | basic_lb_rate_tbl.csv | The basic LB rates by policy year. Columns: pol_year, basic_lb_rate. Unit: %. The policy year that does not appear in this table does not have basic LB awarded. |
 | Top-up LB rates | topup_lb_rate_tbl.csv | The topup LB rates by policy year. Columns: pol_year, topup_lb_rate. Unit: %. The policy year that does not appear in this table does not have top-up LB awarded. |
 | SB % COI | sb_coi_rate_tbl.csv | The SB % COI rates by policy year. Columns: pol_year, sb_coi_rate. Unit: %. The policy year that does not appear in this table does not have SB % COI awarded. |
@@ -1742,6 +1761,6 @@ The tables mentioned in 2.2 and 2.3 are described as follows.
 | Overriding commission | ovrd_tbl.csv | Overriding commission rate by policy year. Columns: pol_year, basic_prem. Unit: %. The last row in the file applies to that policy year and all subsequent policy years. |
 | Regulatory parameters | reg_param_tbl.csv | Columns: solv_marg_res, solv_marg_sar, tax_pc. Unit: %. |
 | Lapse rates | lapse_tbl.csv | The lapse rate by policy year and basic premium frequency. Columns: pol_year, monthly, quarterly, semiann, annual. Unit: %. The last row in the file applies to that policy year and all subsequent policy years. |
-| Mortality rates (select, male) | mortality_select_s4_male.csv | The select mortality table for male, selection period of 4 years, age from 0 to 120 which is corresponding to row labels from -4 to 116. Columns: age[x], q[x], q[x]+1, q[x]+2, q[x]+3, qx+4. Unit: per 1000. The last column is deliberately labeled without the square bracket to express the convergence of the select rate to ultimate rate. This mortality table supports the maximum attained age at maturity of 120 which corresponds to the maximum policy term of (120 – age at entry). |
-| Mortality rates (select, female) | mortality_select_s4_female.csv | The select mortality table for female, selection period of 4 years, age from 0 to 120 which is corresponding to row labels from -4 to 116. Columns: age[x], q[x], q[x]+1, q[x]+2, q[x]+3, qx+4. Unit: per 1000. The last column is also deliberately labeled without the square bracket to express the convergence of the select rate to ultimate rate. This mortality table supports the maximum attained age at maturity of 120 which corresponds to the maximum policy term of (120 – age at entry). |
+| Mortality rates (select, male) | mortality_select_male.csv | The select mortality table for male. Selection period S is automatically determined from the number of data columns: S = (total_columns - 2). Example: 6 columns (1 age + 5 data) → S=4. Data columns represent q[x], q[x]+1, ..., q[x]+S. For ultimate rates, provide as single data column (S=0). Unit: per 1000. Final column header omits brackets to signal ultimate convergence. |
+| Mortality rates (select, female) | mortality_select_female.csv | The select mortality table for female. Selection period S is automatically determined from the number of data columns: S = (total_columns - 2). Example: 6 columns (1 age + 5 data) → S=4. Data columns represent q[x], q[x]+1, ..., q[x]+S. For ultimate rates, provide as single data column (S=0). Unit: per 1000. Final column header omits brackets to signal ultimate convergence. |
 | Scalar parameters | scalar_inputs.yaml | Scalar parameters that do not vary by policy year or age and are therefore not suited to table format. Contains two blocks: Product features: nlg_period (months), age_db_opt_change (years), basic_lb_first_consid_period (months), topup_lb_first_consid_period (months), sb_coi_first_consid_period (months). Model assumptions: ann_ulp_fer (% p.a.), ann_sh_fer (% p.a.), ann_fmc_pc (% p.a.), ann_fme_pc (% p.a.), ann_vir (% p.a.), ann_rdr (% p.a.), inf_pc (% p.a.). All values are provided as plain numbers representing percentages where the unit is %. For example, ann_ulp_fer: 4.5 means 4.5% p.a. |

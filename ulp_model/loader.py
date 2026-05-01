@@ -3,10 +3,7 @@ loader.py - File loading utilities for ULP model parameter tables and policy inp
 """
 from __future__ import annotations
 
-import os
-import re
 from pathlib import Path
-from typing import Optional
 
 import torch
 import yaml
@@ -196,14 +193,16 @@ def load_param_tables(config) -> ParamTables:
     tax_pc = float(rows[0]["tax_pc"])
 
     # ----- mortality tables -----
-    mortality_male, mort_s_male = _load_mortality_table(
-        base / "mortality_select_s4_male.csv", dtype, device
+    mortality_male, mort_s_male, min_age_male = _load_mortality_table(
+        base, "male", dtype, device
     )
-    mortality_female, mort_s_female = _load_mortality_table(
-        base / "mortality_select_s4_female.csv", dtype, device
+    mortality_female, mort_s_female, min_age_female = _load_mortality_table(
+        base, "female", dtype, device
     )
     assert mort_s_male == mort_s_female, "Mortality select periods must match."
+    assert min_age_male == min_age_female, "Minimum table ages must match between male and female tables."
     mortality_select_period = mort_s_male
+    mortality_min_age = min_age_male
 
     return ParamTables(
         alloc_chg_basic=alloc_chg_basic,
@@ -224,6 +223,7 @@ def load_param_tables(config) -> ParamTables:
         mortality_male=mortality_male,
         mortality_female=mortality_female,
         mortality_select_period=mortality_select_period,
+        mortality_min_age=mortality_min_age,
         op_exp_per_pol=op_exp_per_pol,
         op_exp_per_prem=op_exp_per_prem,
         solv_marg_res=solv_marg_res,
@@ -248,30 +248,38 @@ def load_param_tables(config) -> ParamTables:
 
 
 def _load_mortality_table(
-    path: str | Path, dtype: torch.dtype, device: torch.device
-) -> tuple[torch.Tensor, int]:
-    """Parse a mortality CSV with select format.
+    base_dir: Path, gender: str, dtype: torch.dtype, device: torch.device
+) -> tuple[torch.Tensor, int, int]:
+    """Find and parse a mortality CSV with select format.
 
-    Returns (table [121, 5], S).
-    Filename pattern: mortality_[ultimate|select_s{N}]_[male|female].csv
+    Returns (table [n_rows, S+1], S, min_table_age).
+    S is auto-detected: S = (data columns) - 1.
+    min_table_age is the minimum value in the age[x] column.
     """
-    path = Path(path)
-    fname = path.stem  # e.g. "mortality_select_s4_male"
-    m = re.search(r"select_s(\d+)", fname)
-    S = int(m.group(1)) if m else 0
-    n_cols = S + 1  # select cols + 1 ultimate col
+    matches = list(base_dir.glob(f"mortality_select*_{gender}.csv"))
+    if len(matches) == 0:
+        raise FileNotFoundError(
+            f"No mortality table found for '{gender}' in '{base_dir}'. "
+            f"Expected a file matching mortality_select_*_{gender}.csv"
+        )
+    if len(matches) > 1:
+        raise FileNotFoundError(
+            f"Multiple mortality tables found for '{gender}' in '{base_dir}': {matches}"
+        )
 
-    rows = _read_csv(path)
-    # columns: age[x], q[x], q[x]+1, ..., qx+S
+    rows = _read_csv(matches[0])
     col_names = list(rows[0].keys())
-    value_cols = col_names[1:]  # skip the age column
+    value_cols = col_names[1:]  # skip the age[x] column
+
+    S = len(value_cols) - 1
+    min_table_age = min(int(row[col_names[0]]) for row in rows)
 
     n_rows = len(rows)
     table = torch.zeros(n_rows, len(value_cols), dtype=dtype, device=device)
     for i, row in enumerate(rows):
         for j, col in enumerate(value_cols):
             table[i, j] = float(row[col])
-    return table, S
+    return table, S, min_table_age
 
 
 def load_policy_batch(
