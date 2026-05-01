@@ -21,15 +21,15 @@ def compute_ape(policies: PolicyBatch) -> float:
     """Compute Annual Premium Equivalent (APE) for the policy batch.
 
     Rules:
-    - Non-single-pay (prem_term > 1 OR prem_freq != 0/annual):
+    - Non-single-pay (prem_term > 1 OR prem_freq != 12/annual):
         100% of ACP * init_pols_if
-    - Single-pay (prem_term == 1 AND prem_freq == 0/annual):
+    - Single-pay (prem_term == 1 AND prem_freq == 12/annual):
         10% of ACP * init_pols_if
     - Top-up premium: always 10% of ATP * init_pols_if
     """
     is_single_pay = (
         (policies.prem_term == 1)
-        & (policies.prem_freq == 0)
+        & (policies.prem_freq == 12)
     )
     basic_factor = torch.where(
         is_single_pay,

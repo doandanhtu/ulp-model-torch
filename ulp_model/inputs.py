@@ -12,18 +12,18 @@ import torch
 class PolicyBatch:
     """Holds a batch of B policies as per-field tensors."""
 
-    policy_id: torch.Tensor       # [B] long
-    age_at_entry: torch.Tensor    # [B] long
-    sex: torch.Tensor             # [B] long; 0=male, 1=female
-    pol_term: torch.Tensor        # [B] long, years
-    prem_term: torch.Tensor       # [B] long, years
-    prem_freq: torch.Tensor       # [B] long; 0=annual,1=semi,2=quarterly,3=monthly
+    policy_id: torch.Tensor       # [B] int32
+    age_at_entry: torch.Tensor    # [B] int32
+    sex: torch.Tensor             # [B] int32; 0=male, 1=female
+    pol_term: torch.Tensor        # [B] int32, years
+    prem_term: torch.Tensor       # [B] int32, years
+    prem_freq: torch.Tensor       # [B] int32; months between payments: 12=annual, 6=semi, 3=quarterly, 1=monthly
     sum_assd: torch.Tensor        # [B] float
-    db_opt: torch.Tensor          # [B] long; 1=basic,2=escalating
+    db_opt: torch.Tensor          # [B] int32; 1=basic, 2=escalating
     acp: torch.Tensor             # [B] float (annualised committed premium)
     atp: torch.Tensor             # [B] float (annualised top-up premium)
-    topup_term: torch.Tensor      # [B] long, years
-    topup_freq: torch.Tensor      # [B] long; same coding as prem_freq
+    topup_term: torch.Tensor      # [B] int32, years
+    topup_freq: torch.Tensor      # [B] int32; same as prem_freq: 12=annual, 6=semi, 3=quarterly, 1=monthly
     mort_loading: torch.Tensor    # [B] float, % (0=standard)
     init_pols_if: torch.Tensor    # [B] float
 

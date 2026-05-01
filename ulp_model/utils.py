@@ -15,18 +15,6 @@ from .inputs import ParamTables
 # Time step helpers
 # ---------------------------------------------------------------------------
 
-def prem_freq_to_months(prem_freq: torch.Tensor) -> torch.Tensor:
-    """Convert prem_freq code to months between premium payments.
-
-    0 -> 12 (annual)
-    1 ->  6 (semi-annual)
-    2 ->  3 (quarterly)
-    3 ->  1 (monthly)
-    """
-    mapping = torch.tensor([12, 6, 3, 1], dtype=prem_freq.dtype, device=prem_freq.device)
-    return mapping[prem_freq]
-
-
 def attained_age_at_t(age_at_entry: torch.Tensor, t: int) -> torch.Tensor:
     """Return attained age at time step t (in months).
 

@@ -9,13 +9,11 @@ import math
 
 import torch
 
-from .config import ModelConfig
 from .inputs import ParamTables, PolicyBatch
 from .utils import (
     attained_age_at_t,
     lookup_mortality_rate,
     pol_year_at_t,
-    prem_freq_to_months,
 )
 
 
@@ -26,7 +24,7 @@ class DecrementProjection:
         self,
         policies: PolicyBatch,
         param_tables: ParamTables,
-        config: ModelConfig,
+        config,
         part1_outputs: dict,
     ) -> None:
         self.policies = policies
@@ -44,10 +42,12 @@ class DecrementProjection:
             torch.float64 if config.float_precision == "float64" else torch.float32
         )
 
-        # Pre-compute premium frequency in months [B]
-        self.prem_freq_mths = prem_freq_to_months(policies.prem_freq)
-        # freq_col: prem_freq=0(annual)->3, 1(semi)->2, 2(quarterly)->1, 3(monthly)->0
-        self.freq_col = 3 - policies.prem_freq  # [B] long
+        # prem_freq values are already in months (12=annual, 6=semi, 3=quarterly, 1=monthly)
+        self.prem_freq_mths = policies.prem_freq
+        # Map months → lapse_rates column index (cols: 0=monthly, 1=quarterly, 2=semiann, 3=annual)
+        _m2c = torch.zeros(13, dtype=torch.long, device=self.device)
+        _m2c[1] = 0; _m2c[3] = 1; _m2c[6] = 2; _m2c[12] = 3
+        self.freq_col = _m2c[policies.prem_freq.long()]  # [B]
 
         # ---------------------------------------------------------------
         # Allocate [B, T] tensors

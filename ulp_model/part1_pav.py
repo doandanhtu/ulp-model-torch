@@ -10,14 +10,12 @@ from typing import Optional
 
 import torch
 
-from .config import ModelConfig
 from .inputs import ParamTables, PolicyBatch
 from .utils import (
     attained_age_at_t,
     lookup_coi_rate,
     lookup_lien_pc,
     pol_year_at_t,
-    prem_freq_to_months,
     precompute_bonus_schedule,
 )
 
@@ -29,7 +27,7 @@ class PAVProjection:
         self,
         policies: PolicyBatch,
         param_tables: ParamTables,
-        config: ModelConfig,
+        config,
     ) -> None:
         self.policies = policies
         self.param_tables = param_tables
@@ -45,9 +43,9 @@ class PAVProjection:
             torch.float64 if config.float_precision == "float64" else torch.float32
         )
 
-        # Pre-compute premium frequency in months  [B]
-        self.prem_freq_mths = prem_freq_to_months(policies.prem_freq)
-        self.topup_freq_mths = prem_freq_to_months(policies.topup_freq)
+        # prem_freq values are already in months (12=annual, 6=semi, 3=quarterly, 1=monthly)
+        self.prem_freq_mths = policies.prem_freq
+        self.topup_freq_mths = policies.topup_freq
 
         # Pre-compute bonus schedule
         self.bonus_schedule = precompute_bonus_schedule(param_tables, config.MAX_PROJ_YEARS)
