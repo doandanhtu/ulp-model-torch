@@ -71,37 +71,38 @@ def lookup_mortality_rate(
     sex: torch.Tensor,
     pol_year: int,
     S: int,
+    min_table_age: int,
     mort_male: torch.Tensor,
     mort_female: torch.Tensor,
 ) -> torch.Tensor:
     """Look up select mortality rate (per mille) for a given policy year.
 
     The select-S mortality table has:
-      row    = entry_age + max(0, (pol_year-1) - S)
-      col    = min(pol_year-1, S)
-      row_idx = row + 4   (because table row 0 corresponds to age -4)
+      col     = min(pol_year-1, S)
+      row_age = entry_age + max(0, (pol_year-1) - S)
+      row_idx = row_age - min_table_age   (works for any starting age)
 
     Parameters
     ----------
-    age_at_entry : [B] long, entry age in years
-    sex          : [B] long, 0=male 1=female
-    pol_year     : int, current policy year (1-indexed)
-    S            : int, select period
-    mort_male    : [121, S+1] float, per mille
-    mort_female  : [121, S+1] float, per mille
+    age_at_entry  : [B] long, entry age in years
+    sex           : [B] long, 0=male 1=female
+    pol_year      : int, current policy year (1-indexed)
+    S             : int, select period
+    min_table_age : int, minimum age in the mortality table (first row's age value)
+    mort_male     : [n_rows, S+1] float, per mille
+    mort_female   : [n_rows, S+1] float, per mille
 
     Returns
     -------
     [B] float tensor, per mille
     """
-    row_offset = 4  # table row 0 corresponds to age -4
     n_rows, n_cols = mort_male.shape
 
     col = min(pol_year - 1, S)
-    row_age_adj = max(0, (pol_year - 1) - S)  # how many years past select period
+    row_age_adj = max(0, (pol_year - 1) - S)  # years past select period
 
-    row_base = age_at_entry + row_age_adj     # [B]
-    row_idx = (row_base + row_offset).clamp(0, n_rows - 1)  # [B]
+    row_age = age_at_entry + row_age_adj              # [B]
+    row_idx = (row_age - min_table_age).clamp(0, n_rows - 1)  # [B]
 
     rate_male = mort_male[row_idx, col]
     rate_female = mort_female[row_idx, col]
