@@ -3,7 +3,7 @@ ulp_model - Universal Life Policy cash flow projection model using PyTorch.
 
 Package structure
 -----------------
-config.py           ModelConfig dataclass
+config.py           load_config() — loads config.yaml into a SimpleNamespace
 inputs.py           PolicyBatch and ParamTables dataclasses
 loader.py           File-loading utilities
 utils.py            Helper functions (lookups, schedule, etc.)
@@ -14,7 +14,7 @@ model.py            ULPModel orchestrator
 outputs.py          Output writing and reporting utilities
 tests/              Unit and integration tests
 """
-from .config import ModelConfig
+from .config import load_config
 from .inputs import ParamTables, PolicyBatch
 from .loader import load_model_inputs, load_param_tables, load_policy_batch
 from .model import ULPModel
@@ -33,13 +33,12 @@ from .utils import (
     lookup_lien_pc,
     lookup_mortality_rate,
     pol_year_at_t,
-    prem_freq_to_months,
     precompute_bonus_schedule,
 )
 
 __all__ = [
     # Config
-    "ModelConfig",
+    "load_config",
     # Inputs
     "PolicyBatch",
     "ParamTables",
@@ -48,7 +47,6 @@ __all__ = [
     "load_policy_batch",
     "load_model_inputs",
     # Utils
-    "prem_freq_to_months",
     "attained_age_at_t",
     "pol_year_at_t",
     "lookup_coi_rate",
