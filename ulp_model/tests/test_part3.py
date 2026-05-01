@@ -165,6 +165,16 @@ class TestCashflowProjection:
     # SCR
     # ------------------------------------------------------------------
 
+    def test_solv_cap_req_zero_at_t0(self, all_outputs):
+        """SCR must be 0 at t=0 (initialisation month)."""
+        _, _, p3, _, _, _ = all_outputs
+        assert float(p3["solv_cap_req"][0, 0]) == pytest.approx(0.0, abs=1e-9)
+
+    def test_cf_after_scr_zero_at_t0(self, all_outputs):
+        """cf_after_scr must be 0 at t=0 (initialisation month)."""
+        _, _, p3, _, _, _ = all_outputs
+        assert float(p3["cf_after_scr"][0, 0]) == pytest.approx(0.0, abs=1e-9)
+
     def test_solv_cap_req_nonnegative(self, all_outputs):
         """Solvency capital requirement should be non-negative."""
         _, _, p3, _, _, _ = all_outputs

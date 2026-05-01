@@ -428,8 +428,8 @@ class CashflowProjection:
                 + (pt.solv_marg_sar / 100.0) * sar_scr
             ) * is_inforce_end_t
 
-            # Zero when at/past maturity or not in force
-            scr = scr_raw * (1.0 - at_or_past_mat)
+            # Zero when at/past maturity, not in force, or t=0 (initialisation)
+            scr = scr_raw * (1.0 - at_or_past_mat) * float(t > 0)
             self.solv_cap_req[:, t] = scr
 
             # -------------------------------------------------------

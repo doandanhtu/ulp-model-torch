@@ -99,14 +99,16 @@ class TestDecrementProjection:
         assert float(p2["no_mats"][0, :mat_t].sum()) == pytest.approx(0.0, abs=1e-10)
 
     def test_surrs_annual_only_at_prem_due_months(self, part2_outputs):
-        """For annual premium, surrender should occur at months 1,13,25,... (prem due)
-        and not in between (within prem term)."""
+        """For annual premium, surrender should occur at end of each policy year
+        (t=12, 24, ...) and not within the year."""
         p2, policies, _, _ = part2_outputs
-        # Check t=2 (not prem due, not past prem_term=20yrs): should have near-zero surr
-        # since Case 5 (no lapse) applies
         prem_term_months = int(policies.prem_term[0]) * 12  # 240
-        if 2 <= prem_term_months:
-            assert float(p2["no_surrs"][0, 2]) == pytest.approx(0.0, abs=1e-10)
+        # No lapse at start of year 1 (t=1) or mid-year (t=2..11)
+        for t in [1, 2, 5, 11]:
+            assert float(p2["no_surrs"][0, t]) == pytest.approx(0.0, abs=1e-10)
+        # Lapse at end of year 1 (t=12), within prem term
+        if 12 <= prem_term_months:
+            assert float(p2["no_surrs"][0, 12]) > 0.0
 
     def test_pols_if_end_of_month_identity(self, part2_outputs):
         """no_pols_if[:,t] = no_pols_ifsm[:,t] - deaths - surrs - mats at t."""

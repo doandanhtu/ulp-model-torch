@@ -194,8 +194,9 @@ class DecrementProjection:
         # m_lapse = 1 - (1 - ann_lapse/100)^(1/n_payments_per_year)
         #         = 1 - (1 - ann_lapse/100)^(prem_freq_mths/12)
         # prem_due_this_month: (t-1) % prem_freq_mths == 0 AND t <= prem_term_months
+        # Lapse at end of each payment period: t=12,24,... for annual; t=1,2,... for monthly
         prem_due = (
-            ((t - 1) % self.prem_freq_mths == 0).to(dtype)
+            (t % self.prem_freq_mths == 0).to(dtype)
             * (t <= prem_term_months).to(dtype)
         )
         exponent_case4 = self.prem_freq_mths.to(dtype) / 12.0

@@ -34,9 +34,9 @@ n_simulations: 5000              # Number of Monte Carlo simulations (stochastic
 # -----------------------------------------------------------------------------
 # Output settings
 # -----------------------------------------------------------------------------
-output_dir: ./results/test_per_policy_1                 # Directory where output files are written
+output_dir: ./results/test_summary_1                 # Directory where output files are written
 
-output_mode: per_policy
+output_mode: summary
 # Options:
 #   summary     - one aggregated time-series CSV per scenario (fastest)
 #   per_policy  - per-policy scalar outputs + first 24 months of key time series
