@@ -277,45 +277,57 @@ def _load_mortality_table(
 def load_policy_batch(
     config, device: torch.device, dtype: torch.dtype
 ) -> PolicyBatch:
-    """Load policies from CSV or Parquet in config.policy_inputs_dir."""
-    import glob as _glob
+    """Load policies from a single CSV or Parquet file specified in config.policy_inputs_file."""
+    import pandas as pd
 
-    pol_dir = Path(config.policy_inputs_dir)
-    csv_files = list(pol_dir.glob("*.csv"))
-    parquet_files = list(pol_dir.glob("*.parquet"))
-
-    if parquet_files:
-        import pandas as pd
-        frames = [pd.read_parquet(f) for f in parquet_files]
-        df = pd.concat(frames, ignore_index=True)
-    elif csv_files:
-        import pandas as pd
-        frames = [pd.read_csv(f) for f in csv_files]
-        df = pd.concat(frames, ignore_index=True)
-    else:
+    pol_file = Path(config.policy_inputs_file)
+    if not pol_file.exists():
         raise FileNotFoundError(
-            f"No CSV or Parquet policy files found in '{pol_dir}'."
+            f"Policy input file not found: '{pol_file}'. "
+            f"Check policy_inputs_file in your config."
         )
 
-    def _long(col: str) -> torch.Tensor:
-        return torch.tensor(df[col].values, dtype=torch.long, device=device)
+    suffix = pol_file.suffix.lower()
+    if suffix == ".parquet":
+        df = pd.read_parquet(pol_file)
+    elif suffix == ".csv":
+        df = pd.read_csv(pol_file)
+    else:
+        raise ValueError(
+            f"Unsupported policy file format '{suffix}' in '{pol_file}'. "
+            f"Supported formats: .csv, .parquet"
+        )
+
+    required_cols = [
+        "policy_id", "age_at_entry", "sex", "pol_term", "prem_term",
+        "prem_freq", "sum_assd", "db_opt", "acp", "atp",
+        "topup_term", "topup_freq", "mort_loading", "init_pols_if",
+    ]
+    missing = [c for c in required_cols if c not in df.columns]
+    if missing:
+        raise ValueError(
+            f"Policy file '{pol_file}' is missing required columns: {missing}"
+        )
+
+    def _int(col: str) -> torch.Tensor:
+        return torch.tensor(df[col].values, dtype=torch.int32, device=device)
 
     def _float(col: str) -> torch.Tensor:
         return torch.tensor(df[col].values, dtype=dtype, device=device)
 
     return PolicyBatch(
-        policy_id=_long("policy_id"),
-        age_at_entry=_long("age_at_entry"),
-        sex=_long("sex"),
-        pol_term=_long("pol_term"),
-        prem_term=_long("prem_term"),
-        prem_freq=_long("prem_freq"),
+        policy_id=_int("policy_id"),
+        age_at_entry=_int("age_at_entry"),
+        sex=_int("sex"),
+        pol_term=_int("pol_term"),
+        prem_term=_int("prem_term"),
+        prem_freq=_int("prem_freq"),
         sum_assd=_float("sum_assd"),
-        db_opt=_long("db_opt"),
+        db_opt=_int("db_opt"),
         acp=_float("acp"),
         atp=_float("atp"),
-        topup_term=_long("topup_term"),
-        topup_freq=_long("topup_freq"),
+        topup_term=_int("topup_term"),
+        topup_freq=_int("topup_freq"),
         mort_loading=_float("mort_loading"),
         init_pols_if=_float("init_pols_if"),
     )

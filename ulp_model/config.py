@@ -25,7 +25,7 @@ def load_config(path: str | Path) -> SimpleNamespace:
         compute_device         = str(raw["compute_device"]),
         batch_size             = int(raw["batch_size"]),
         output_batch_size      = int(raw["output_batch_size"]),
-        policy_inputs_dir      = str(raw["policy_inputs_dir"]),
+        policy_inputs_file     = str(raw["policy_inputs_file"]),
         param_tables_dir       = str(raw["param_tables_dir"]),
         output_dir             = str(raw["output_dir"]),
         scenario_file          = str(raw["scenario_file"]),

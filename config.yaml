@@ -22,15 +22,21 @@ output_batch_size: 1000     # Policies per per-policy output file (output_mode: 
 # -----------------------------------------------------------------------------
 # Input paths
 # -----------------------------------------------------------------------------
-policy_inputs_dir: ./policy_inputs    # Directory containing policy CSV / Parquet files
-param_tables_dir: .                   # Directory containing parameter table CSVs and scalar_inputs.yaml
+policy_inputs_file: ./policy_data/test_policies_1.csv    # Policy input file (.csv or .parquet)
+param_tables_dir: ./param_tables/                   # Directory containing parameter table CSVs and scalar_inputs.yaml
+
+# -----------------------------------------------------------------------------
+# Stochastic / scenario settings
+# -----------------------------------------------------------------------------
+scenario_file: ./sen_fac/scenarios.csv   # CSV with one scenario per row (investment return assumptions)
+n_simulations: 5000              # Number of Monte Carlo simulations (stochastic mode only)
 
 # -----------------------------------------------------------------------------
 # Output settings
 # -----------------------------------------------------------------------------
-output_dir: ./results                 # Directory where output files are written
+output_dir: ./results/test_per_policy_1                 # Directory where output files are written
 
-output_mode: summary
+output_mode: per_policy
 # Options:
 #   summary     - one aggregated time-series CSV per scenario (fastest)
 #   per_policy  - per-policy scalar outputs + first 24 months of key time series
@@ -45,10 +51,6 @@ output_time_steps: all
 #   additional_output_vars:
 #     - bav_ab
 #     - g_bav_ab
-additional_output_vars: null
+additional_output_vars: ["av_bd", "av_ad", "av_bval_bb", "av_ab"]
 
-# -----------------------------------------------------------------------------
-# Stochastic / scenario settings
-# -----------------------------------------------------------------------------
-scenario_file: ./scenarios.csv   # CSV with one scenario per row (investment return assumptions)
-n_simulations: 5000              # Number of Monte Carlo simulations (stochastic mode only)
+
