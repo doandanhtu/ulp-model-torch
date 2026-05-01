@@ -9,7 +9,6 @@ import math
 
 import torch
 
-from .config import ModelConfig
 from .inputs import ParamTables, PolicyBatch
 from .utils import lookup_lien_pc, pol_year_at_t
 
@@ -21,7 +20,7 @@ class CashflowProjection:
         self,
         policies: PolicyBatch,
         param_tables: ParamTables,
-        config: ModelConfig,
+        config,
         part1_outputs: dict,
         part2_outputs: dict,
     ) -> None:

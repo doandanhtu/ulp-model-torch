@@ -133,7 +133,7 @@ class TestAPEComputation:
         import torch
 
         def _l(v):
-            return torch.tensor([v], dtype=torch.long)
+            return torch.tensor([v], dtype=torch.int32)
 
         def _f(v):
             return torch.tensor([v], dtype=torch.float64)
@@ -146,13 +146,13 @@ class TestAPEComputation:
             sex=_l(0),
             pol_term=_l(10),
             prem_term=_l(1),    # single pay
-            prem_freq=_l(0),    # annual (single pay check)
+            prem_freq=_l(12),   # annual (single pay check)
             sum_assd=_f(1_000_000.0),
             db_opt=_l(1),
             acp=_f(100_000.0),
             atp=_f(0.0),
             topup_term=_l(0),
-            topup_freq=_l(0),
+            topup_freq=_l(12),
             mort_loading=_f(0.0),
             init_pols_if=_f(1.0),
         )
@@ -169,7 +169,7 @@ class TestMultiPolicyBatch:
         from ulp_model.inputs import PolicyBatch
 
         def _l(*vals):
-            return torch.tensor(vals, dtype=torch.long)
+            return torch.tensor(vals, dtype=torch.int32)
 
         def _f(*vals):
             return torch.tensor(vals, dtype=torch.float64)
@@ -180,13 +180,13 @@ class TestMultiPolicyBatch:
             sex=_l(0, 1),
             pol_term=_l(20, 15),
             prem_term=_l(20, 15),
-            prem_freq=_l(0, 3),     # annual / monthly
+            prem_freq=_l(12, 1),    # annual / monthly
             sum_assd=_f(500_000_000.0, 200_000_000.0),
             db_opt=_l(2, 1),
             acp=_f(20_000_000.0, 10_000_000.0),
             atp=_f(0.0, 0.0),
             topup_term=_l(0, 0),
-            topup_freq=_l(0, 0),
+            topup_freq=_l(12, 12),
             mort_loading=_f(0.0, 0.0),
             init_pols_if=_f(1.0, 1.0),
         )

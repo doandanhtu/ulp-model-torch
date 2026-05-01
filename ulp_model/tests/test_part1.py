@@ -11,7 +11,6 @@ import math
 import pytest
 import torch
 
-from ulp_model.config import ModelConfig
 from ulp_model.part1_pav import PAVProjection
 
 from .conftest_helpers import make_config, make_param_tables, make_single_policy

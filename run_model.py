@@ -58,9 +58,9 @@ def main() -> int:
     # ------------------------------------------------------------------
     # Load config
     # ------------------------------------------------------------------
-    from ulp_model.config import ModelConfig
+    from ulp_model.config import load_config
 
-    config = ModelConfig.from_yaml(config_path)
+    config = load_config(config_path)
 
     # Apply CLI overrides
     if args.output_dir is not None:

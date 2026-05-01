@@ -7,7 +7,6 @@ import time
 
 import torch
 
-from .config import load_config
 from .inputs import ParamTables, PolicyBatch
 from .part1_pav import PAVProjection
 from .part2_decrements import DecrementProjection
@@ -20,7 +19,7 @@ class ULPModel:
     Orchestrates Part 1 (PAV), Part 2 (Decrements), and Part 3 (Cashflows).
     """
 
-    def __init__(self, config: ModelConfig) -> None:
+    def __init__(self, config) -> None:
         self.config = config
         self.device = torch.device(config.compute_device)
         self.dtype = (

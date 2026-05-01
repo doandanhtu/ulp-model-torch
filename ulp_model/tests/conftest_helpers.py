@@ -10,7 +10,7 @@ from pathlib import Path
 
 import torch
 
-from ulp_model.config import ModelConfig
+from ulp_model.config import load_config
 from ulp_model.inputs import ParamTables, PolicyBatch
 from ulp_model.loader import load_param_tables
 
@@ -18,12 +18,12 @@ from ulp_model.loader import load_param_tables
 _PROJ_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
-def make_config() -> ModelConfig:
-    return ModelConfig(
-        param_tables_dir=str(_PROJ_ROOT),
-        policy_inputs_dir=str(_PROJ_ROOT / "policy_inputs"),
-        output_dir=str(_PROJ_ROOT / "results"),
-    )
+def make_config():
+    cfg = load_config(_PROJ_ROOT / "config.yaml")
+    cfg.param_tables_dir = str(_PROJ_ROOT / "param_tables")
+    cfg.policy_inputs_file = str(_PROJ_ROOT / "policy_inputs" / "policies.csv")
+    cfg.output_dir = str(_PROJ_ROOT / "results")
+    return cfg
 
 
 def make_param_tables() -> ParamTables:
@@ -37,12 +37,12 @@ def make_single_policy(
     """Create a single test policy:
     - Age at entry: 30, male
     - Policy term: 20 years, premium term: 20 years
-    - Annual premium frequency (prem_freq=0)
+    - Annual premium frequency (prem_freq=12)
     - SA: 500,000,000 (500M), DB option 2 (escalating)
     - ACP: 20,000,000 (20M), no top-up
     """
     def _l(v: int) -> torch.Tensor:
-        return torch.tensor([v], dtype=torch.long, device=device)
+        return torch.tensor([v], dtype=torch.int32, device=device)
 
     def _f(v: float) -> torch.Tensor:
         return torch.tensor([v], dtype=dtype, device=device)
@@ -53,13 +53,13 @@ def make_single_policy(
         sex=_l(0),           # male
         pol_term=_l(20),
         prem_term=_l(20),
-        prem_freq=_l(0),     # annual
+        prem_freq=_l(12),    # annual
         sum_assd=_f(500_000_000.0),
         db_opt=_l(2),        # escalating
         acp=_f(20_000_000.0),
         atp=_f(0.0),
         topup_term=_l(0),
-        topup_freq=_l(0),
+        topup_freq=_l(12),
         mort_loading=_f(0.0),
         init_pols_if=_f(1.0),
     )
