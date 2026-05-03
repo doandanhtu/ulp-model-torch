@@ -22,7 +22,7 @@ output_batch_size: 1000     # Policies per per-policy output file (output_mode: 
 # -----------------------------------------------------------------------------
 # Input paths
 # -----------------------------------------------------------------------------
-policy_inputs_file: ./policy_data/test_policies_200000.csv    # Policy input file (.csv or .parquet)
+policy_inputs_file: ./policy_data/test_policies_3m.parquet    # Policy input file (.csv or .parquet)
 param_tables_dir: ./param_tables/                   # Directory containing parameter table CSVs and scalar_inputs.yaml
 
 # -----------------------------------------------------------------------------
