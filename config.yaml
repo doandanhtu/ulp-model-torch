@@ -11,7 +11,7 @@ max_proj_years: 90          # Maximum projection years (policies mature by this 
 # Numerical settings
 # -----------------------------------------------------------------------------
 float_precision: float64    # float64 (recommended) or float32
-compute_device: cpu         # cpu or cuda (GPU)
+compute_device: cuda         # cpu or cuda (GPU)
 
 # -----------------------------------------------------------------------------
 # Batch processing
@@ -22,7 +22,7 @@ output_batch_size: 1000     # Policies per per-policy output file (output_mode: 
 # -----------------------------------------------------------------------------
 # Input paths
 # -----------------------------------------------------------------------------
-policy_inputs_file: ./policy_data/test_policies_1.csv    # Policy input file (.csv or .parquet)
+policy_inputs_file: ./policy_data/test_policies_200000.csv    # Policy input file (.csv or .parquet)
 param_tables_dir: ./param_tables/                   # Directory containing parameter table CSVs and scalar_inputs.yaml
 
 # -----------------------------------------------------------------------------
@@ -51,6 +51,6 @@ output_time_steps: all
 #   additional_output_vars:
 #     - bav_ab
 #     - g_bav_ab
-additional_output_vars: ["av_bd", "av_ad", "av_bval_bb", "av_ab"]
+additional_output_vars: null # ["av_bd", "av_ad", "av_bval_bb", "av_ab"]
 
 

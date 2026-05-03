@@ -1,6 +1,11 @@
 """
 run_model.py - Command-line entry point for the ULP cash flow model.
 
+Policies are always processed in batches of config.batch_size (set in
+config.yaml).  When the total number of policies is less than or equal
+to batch_size the model runs as a single batch, which is equivalent to
+the previous full-load behaviour.
+
 Usage
 -----
     python run_model.py                          # uses config.yaml in current directory
@@ -11,7 +16,6 @@ from __future__ import annotations
 
 import argparse
 import sys
-import time
 from pathlib import Path
 
 
@@ -44,6 +48,13 @@ def parse_args() -> argparse.Namespace:
         choices=["summary", "per_policy", "both"],
         help="Override output_mode from config",
     )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=None,
+        metavar="N",
+        help="Override batch_size from config (policies per batch)",
+    )
     return parser.parse_args()
 
 
@@ -69,6 +80,8 @@ def main() -> int:
         config.compute_device = args.device
     if args.mode is not None:
         config.output_mode = args.mode
+    if args.batch_size is not None:
+        config.batch_size = args.batch_size
 
     print(f"ULP Model")
     print(f"  Config          : {config_path}")
@@ -79,34 +92,27 @@ def main() -> int:
     print(f"  Device          : {config.compute_device}")
     print(f"  Precision       : {config.float_precision}")
     print(f"  Projection      : {config.MAX_PROJ_YEARS} years ({config.MAX_PROJ_MONTHS} months)")
+    print(f"  Batch size      : {config.batch_size:,}")
     print()
 
     # ------------------------------------------------------------------
-    # Load inputs
-    # ------------------------------------------------------------------
-    from ulp_model.loader import load_model_inputs
-
-    print("Loading inputs...", end=" ", flush=True)
-    t0 = time.perf_counter()
-    policies, param_tables = load_model_inputs(config)
-    print(f"done ({time.perf_counter() - t0:.2f}s)  |  {policies.policy_id.shape[0]:,} policies")
-
-    # ------------------------------------------------------------------
-    # Run model
+     # Run model (always batched; single batch when n_policies <= batch_size)
     # ------------------------------------------------------------------
     from ulp_model.model import ULPModel
-    from ulp_model.outputs import print_metrics, write_summary_outputs, write_per_policy_outputs
-
+    from ulp_model.outputs import print_metrics, write_summary_outputs
+ 
     model = ULPModel(config)
-
-    print("Running projection...", end=" ", flush=True)
-    result = model.run(policies, param_tables)
-    print(f"done ({result['elapsed']:.2f}s)")
-
+    result = model.run_portfolio()
+ 
     # ------------------------------------------------------------------
     # Print metrics
     # ------------------------------------------------------------------
-    print_metrics(result["summary"], policies, scenario_id=1, elapsed_time=result["elapsed"])
+    print_metrics(
+        result["summary"],
+        scenario_id=1,
+        elapsed_time=result["elapsed"],
+        ape=result["ape"],
+    )
 
     # ------------------------------------------------------------------
     # Write outputs
@@ -118,7 +124,6 @@ def main() -> int:
 
         # Filter to requested time steps
         if config.output_time_steps != "all" and isinstance(config.output_time_steps, list):
-            import torch
             ts = config.output_time_steps
             summary_out = {k: v[ts] for k, v in summary.items()}
         else:
@@ -128,17 +133,46 @@ def main() -> int:
         print(f"  Summary output  → {config.output_dir}/summary_scen1.csv")
 
     if config.output_mode in ("per_policy", "both"):
-        write_per_policy_outputs(
-            result["part1"],
-            result["part2"],
-            result["part3"],
-            policies.policy_id,
-            scenario_id=1,
-            output_dir=config.output_dir,
-            output_batch_size=config.output_batch_size,
+        # Per-policy output requires the raw [B, T] tensors which are not
+        # retained by run_portfolio (by design, to bound GPU memory).
+        # This mode is only feasible when the entire portfolio fits in one
+        # batch (n_policies <= batch_size).  Raise a clear error otherwise.
+        from ulp_model.loader import PolicyBatchIterator
+        import torch
+ 
+        iterator = PolicyBatchIterator(
+            config,
+            config.batch_size,
+            torch.device(config.compute_device),
+            torch.float64 if config.float_precision == "float64" else torch.float32,
         )
-        print(f"  Per-policy output → {config.output_dir}/per_policy_scen*.csv")
-
+        if iterator.n_batches > 1:
+            print(
+                f"[WARNING] output_mode='per_policy' is not supported when the portfolio "
+                f"spans multiple batches ({iterator.n_batches} batches for "
+                f"{iterator.n_policies:,} policies at batch_size={config.batch_size:,}). "
+                f"Increase batch_size to >= {iterator.n_policies:,} or switch to "
+                f"output_mode='summary'."
+            )
+        else:
+            from ulp_model.loader import load_param_tables
+            from ulp_model.outputs import write_per_policy_outputs
+ 
+            param_tables = load_param_tables(config)
+            # Single batch: re-run to obtain per-policy tensors
+            for policies, _idx, _s, _e in iterator:
+                single_result = model.run(policies, param_tables)
+                write_per_policy_outputs(
+                    single_result["part1"],
+                    single_result["part2"],
+                    single_result["part3"],
+                    policies.policy_id,
+                    scenario_id=1,
+                    output_dir=config.output_dir,
+                    output_batch_size=config.output_batch_size,
+                )
+                print(f"  Per-policy output -> {config.output_dir}/per_policy_scen*.csv")
+ 
     return 0
 
 
