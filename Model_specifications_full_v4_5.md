@@ -244,6 +244,7 @@ For a life entering at age 30 with selection period S = 4:
 | 5 | 30 (Age[x] = 30) | 4 | q_30+4 (col qx+4) |
 | 6 | 31 (Age[x] = 31) | 4 | q_31+4 (col qx+4) |
 | 7 | 32 (Age[x] = 32) | 4 | q_32+4 (col qx+4) |
+
 ***Selection period parameter:*** The selection period S is automatically determined from the table structure (not encoded in the filename).
  
 The mortality table should be a CSV file whose filename follows the pattern `mortality_select_[male|female].csv`. The model loader will automatically detect the selection period S from the number of data columns:** S = (total\_columns - 1) - 1 = total\_columns - 2**
