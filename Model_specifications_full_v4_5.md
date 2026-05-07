@@ -2,7 +2,7 @@
 
 Model configuration parameters control the runtime behaviour of the model and are independent of any individual policy or assumption. They should be stored in a dedicated configuration file (e.g., config.yaml) separate from all input tables.
 
-**Projection horizon (MAX_PROJ_YEARS)**: The maximum number of years projected by the model. This determines the total number of monthly time steps as MAX_PROJ_MONTHS = MAX_PROJ_YEARS × 12 + 1 (months 0 through MAX_PROJ_MONTHS - 1). For a policy with pol_term < MAX_PROJ_YEARS, all variables are zero from t = pol_term × 12 + 1 onward, enforced by is_inforce_bgn and is_inforce_end. A default value of 90 years is recommended for typical ULP portfolios.
+**Projection horizon (MAX\_PROJ\_YEARS)**: The maximum number of years projected by the model. This determines the total number of monthly time steps as MAX_PROJ_MONTHS = MAX_PROJ_YEARS × 12 + 1 (months 0 through MAX_PROJ_MONTHS - 1). For a policy with pol_term < MAX_PROJ_YEARS, all variables are zero from t = pol_term × 12 + 1 onward, enforced by is_inforce_bgn and is_inforce_end. A default value of 90 years is recommended for typical ULP portfolios.
 
 Note that this parameter should be set to at least the longest policy term in the portfolio being modelled to avoid model error.
 
@@ -12,21 +12,21 @@ Note that this parameter should be set to at least the longest policy term in th
 
 **Output directory:** The path to which result files will be written. Summary outputs are written as CSV files named by scenario ID (e.g., results/scenario_001.csv). Per-policy outputs are written as Parquet files under a subdirectory (e.g., results/per_policy/scenario_001.parquet). Stochastic outputs are written as a single Parquet file to the same directory.
 
-**Output mode (****output_mode****):** Specifies which output mode or combination of modes to run. Valid values are summary, per_policy, and stochastic. Summary and per-policy modes may be combined in a single run; stochastic mode must be run independently. Default: summary.
+**Output mode (output\_mode):** Specifies which output mode or combination of modes to run. Valid values are summary, per_policy, and stochastic. Summary and per-policy modes may be combined in a single run; stochastic mode must be run independently. Default: summary.
 
-**Additional output variables (****additional_output_vars****):** Applicable in per-policy and stochastic modes. Accepts either a list of specific variable names (e.g., ["bav_bd", "tuav_bd", "tot_dedncf"]) or the keyword "all" to include every time-series variable across all three computation tables. When set to "all", the model prints an estimated output size and a warning recommending use on a small policy subset rather than a full production run. Default: not set, meaning only the standard summary variable list is written.
+**Additional output variables (additional\_output\_vars):** Applicable in per-policy and stochastic modes. Accepts either a list of specific variable names (e.g., ["bav_bd", "tuav_bd", "tot_dedncf"]) or the keyword "all" to include every time-series variable across all three computation tables. When set to "all", the model prints an estimated output size and a warning recommending use on a small policy subset rather than a full production run. Default: not set, meaning only the standard summary variable list is written.
 
-**Output time steps (****output_time_steps****):** Applicable in stochastic mode. Accepts either a list of specific time step indices or the keyword "all" for the full projection horizon. Default: "all".
+**Output time steps (output\_time\_steps):** Applicable in stochastic mode. Accepts either a list of specific time step indices or the keyword "all" for the full projection horizon. Default: "all".
 
-**Number of simulations (****n_simulations****):** Applicable in stochastic mode only. Specifies the number of stochastic simulations to perform. The model is designed to support up to 1,000,000 simulations. Default: 5000.
+**Number of simulations (n\_simulations):** Applicable in stochastic mode only. Specifies the number of stochastic simulations to perform. The model is designed to support up to 1,000,000 simulations. Default: 5000.
 
-**Per-policy output batch size (****output_batch_size****):** Applicable in per-policy mode. Controls the number of policies written to disk per batch, keeping peak memory usage bounded. Default: 1,000 policies per batch.
+**Per-policy output batch size (output\_batch\_size):** Applicable in per-policy mode. Controls the number of policies written to disk per batch, keeping peak memory usage bounded. Default: 1,000 policies per batch.
 
-**Floating point precision (****float_precision****):** Specifies the numeric precision used in tensor computations. Default is float64 for all account value accumulations. This parameter exists to facilitate future mixed-precision configurations.
+**Floating point precision (float\_precision):** Specifies the numeric precision used in tensor computations. Default is float64 for all account value accumulations. This parameter exists to facilitate future mixed-precision configurations.
 
-**Compute device (****compute_device****):** Specifies the hardware device used for computation, e.g., cpu or cuda. When set to cuda, the model will use the first available GPU. Default: cpu.
+**Compute device (compute\_device):** Specifies the hardware device used for computation, e.g., cpu or cuda. When set to cuda, the model will use the first available GPU. Default: cpu.
 
-**Processing batch size (****batch_size****):** Specifies the number of policies processed simultaneously in a single vectorised batch on the compute device. When the portfolio is larger than this value, the model splits the portfolio into batches and processes them sequentially, accumulating results after each batch. This parameter exists primarily to manage VRAM constraints when running on GPU, where the memory required scales with batch size, number of time steps, and number of output variables held in memory simultaneously. A smaller batch size reduces peak VRAM usage at the cost of slightly higher overhead per policy. Default: to be determined based on hardware profiling, but a value in the range of 10,000–100,000 policies is a reasonable starting point for a GPU with 6–16 GB VRAM running at float64 precision. This parameter is independent of output_batch_size, which controls only the number of policies written to disk per flush in per-policy mode.
+**Processing batch size (batch\_size):** Specifies the number of policies processed simultaneously in a single vectorised batch on the compute device. When the portfolio is larger than this value, the model splits the portfolio into batches and processes them sequentially, accumulating results after each batch. This parameter exists primarily to manage VRAM constraints when running on GPU, where the memory required scales with batch size, number of time steps, and number of output variables held in memory simultaneously. A smaller batch size reduces peak VRAM usage at the cost of slightly higher overhead per policy. Default: to be determined based on hardware profiling, but a value in the range of 10,000–100,000 policies is a reasonable starting point for a GPU with 6–16 GB VRAM running at float64 precision. This parameter is independent of output_batch_size, which controls only the number of policies written to disk per flush in per-policy mode.
 
 # Model Inputs
 
@@ -48,27 +48,27 @@ For a single policy:
 
 - **Sex**: Male or Female, in Excel, this is currently coded as 0 for male and 1 for female
 
-- **Policy term** (**pol_term**): The policy term in years, e.g., 20, 30, …
+- **Policy term** (**pol\_term**): The policy term in years, e.g., 20, 30, …
 
-- **Premium term** (**prem_term**): The payable term of the basic premium in years. E.g., 20, 30, …
+- **Premium term** (**prem\_term**): The payable term of the basic premium in years. E.g., 20, 30, …
 
 - **Sum Assured (SA)**: e.g., 500,000,000, 1,000,000,000, etc.
 
-- **Death Benefit Option (DB option/DB_opt)**: either Basic or Escalating. Basic means DB = Max(SA, PAV), Escalating means DB = Sum(SA,PAV). In Excel, this is currently 1 for Basic and 2 for Escalating.
+- **Death Benefit Option (DB option/DB\_opt)**: either Basic or Escalating. Basic means DB = Max(SA, PAV), Escalating means DB = Sum(SA,PAV). In Excel, this is currently 1 for Basic and 2 for Escalating.
 
 - **Annualized Committed Premium (ACP)**: This indicates the annualized basic premium. E.g., 20,000,000. Each installment of the basic premium will be converted from this input. For example, for semi-annual frequency, each installment is equal to ACP/2.
 
-- **Premium frequency (prem_freq)**: This is the basic premium frequency. It can be either annual, semi-annual, quarterly, or monthly. Annual means that the ACP is payable once at the beginning of each policy year. Semi-annual means that the ACP is payable twice at the beginning of month 1 and month 7 every policy year, and so on.
+- **Premium frequency (prem\_freq)**: This is the basic premium frequency. It can be either annual, semi-annual, quarterly, or monthly. Annual means that the ACP is payable once at the beginning of each policy year. Semi-annual means that the ACP is payable twice at the beginning of month 1 and month 7 every policy year, and so on.
 
 - **Annualized Top up premium (ATP)**: e.g., 20,000,000
 
-- **Top up term (topup_term)**: The payable term of the top up in years.
+- **Top up term (topup\_term)**: The payable term of the top up in years.
 
-- **Top up frequency (topup_freq)**: The payment frequency for top up, same as the ACP frequency, but for top up.
+- **Top up frequency (topup\_freq)**: The payment frequency for top up, same as the ACP frequency, but for top up.
 
-- **Mortality loading (mort_loading)**: The substandard loading applied to the COI of the substandard life insured. This is provided in the unit of %, e.g., 100 means an extra 100% of COI is charged. The default value is 0 for standard lives.
+- **Mortality loading (mort\_loading)**: The substandard loading applied to the COI of the substandard life insured. This is provided in the unit of %, e.g., 100 means an extra 100% of COI is charged. The default value is 0 for standard lives.
 
-- **Initial policies inforce (init_pols_if)**: The number of policies currently projected. This is defaulted to be 1. It is normally used in grouping calculations.
+- **Initial policies inforce (init\_pols\_if)**: The number of policies currently projected. This is defaulted to be 1. It is normally used in grouping calculations.
 
 For a portfolio of policies, there will be a table where each row contains a policy ID and all other fields required for a single policy (age, sex, policy term, premium term, SA, DB option, ACP, ACP frequency, ATP, Top up term, Top up frequency, mortality loading, Initial policies inforce).
 
@@ -78,55 +78,55 @@ A table that holds a portfolio of policies to model will have the following form
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | … | … | … | … | … | … | … | … | … | … | … | … | … |
 
-There should be a directory that holds the files for policy inputs. For example, a directory called “policies”. If the file containing the policy inputs is a csv file, we may have something that looks like: policies/tested_policies.csv. 
+There should be a directory that holds the files for policy inputs. For example, a directory called “policy_data”. If the file containing the policy inputs is a csv file, we may have something that looks like: policy_data/tested_policies.csv. 
 
 Since the model is developed for large portfolios, Parquet is the recommended format. CSV is acceptable for small test cases.
 
 ## Product features
 
-The following should be configurable.
+The following parameters should be configurable to allow for different product features.
 
 All input tables referenced in this subsection and the model assumptions subsection are provided as CSV files. The full list of tables, their filenames, column definitions, units, and any special conventions are documented in the Appendix. Where a table is mentioned below, the filename is given in parentheses for direct reference.
 
 Scalar parameters for this section that are not suited to table format are defined in scalar_inputs.yaml under the product features block; see the Appendix for the full file description.
 
-- **Allocation charge (alloc_chg_tbl.csv)**: the remaining proportion of the premium after deducting this charge will be allocated into the base account (for ACP) or the top-up account (for ATP). This should be a table specifying the rates (unit: %) for each policy year for base premium (ACP) and topup premium (ATP). 
+**Allocation charge (alloc\_chg\_tbl.csv)**: the remaining proportion of the premium after deducting this charge will be allocated into the base account (for ACP) or the top-up account (for ATP). This should be a table specifying the rates (unit: %) for each policy year for base premium (ACP) and topup premium (ATP). 
 
-- **No lapse guarantee period (NLG period)**: the number of months, currently 48.
+**No lapse guarantee period (NLG period)**: the number of months, currently 48.
 
-- **Surrender charge (surr_chg_tbl.csv)**: A percentage of ACP or account value that is charged if the policyholder surrenders the policy before maturity. 
+**Surrender charge (surr\_chg\_tbl.csv)**: A percentage of ACP or account value that is charged if the policyholder surrenders the policy before maturity. 
 
-- **Admin charge (admin_chg_tbl.csv)**: This is a monthly charge and governed by 3 parameters: the current level, the amount increased each year and the cap level. I.e., start at 40,000 per month, increase by 2,000 per month each policy year, and cap at 60,000. For example, in the first projection year, each month will be charged 40,000, then in the second year, each month will be charged 42,000, and so on until the cap of 60,000 is reached.
+**Admin charge (admin\_chg\_tbl.csv)**: This is a monthly charge and governed by 3 parameters: the current level, the amount increased each year and the cap level. I.e., start at 40,000 per month, increase by 2,000 per month each policy year, and cap at 60,000. For example, in the first projection year, each month will be charged 40,000, then in the second year, each month will be charged 42,000, and so on until the cap of 60,000 is reached.
 
-- **COI table (coi_tbl.csv)**: This should be a table per mille for 2 genders, ages 0 - 98. E.g., male aged 0: 2.63, female aged 0: 1.88, etc. Refer to the appendix for the detailed table.
+**COI table (coi\_tbl.csv)**: This should be a table per mille for 2 genders, ages 0 - 98. E.g., male aged 0: 2.63, female aged 0: 1.88, etc. Refer to the appendix for the detailed table.
 
-- **Hard guaranteed investment rate (hard_g_inv_tbl.csv)**: A table of annual hard guaranteed investment rates for each policy year as follows. 
+**Hard guaranteed investment rate (hard\_g\_inv\_tbl.csv)**: A table of annual hard guaranteed investment rates for each policy year as follows. 
 
-- **LIENclause (lien_tbl.csv)**: This is the adjusted proportion of sum assured paid for children. For life insured aged 0 – 3, the LIEN applied on the sum assured is 20%, 40%, 60% and 80%, respectively. For age 4 and older, it is 100%. This means, for example, age 1, the sum assured applied for such age will only be 40% of the sum assured registered in the policy inputs. 
+**LIENclause (lien\_tbl.csv)**: This is the adjusted proportion of sum assured paid for children. For life insured aged 0 – 3, the LIEN applied on the sum assured is 20%, 40%, 60% and 80%, respectively. For age 4 and older, it is 100%. This means, for example, age 1, the sum assured applied for such age will only be 40% of the sum assured registered in the policy inputs. 
 
-- **The age where DB option changes (age_db_opt_change)**: If the DB option is escalating then it will automatically change to basic from this age. This is currently 65.
+**The age where DB option changes (age\_db\_opt\_change)**: If the DB option is escalating then it will automatically change to basic from this age. This is currently 65.
 
-- **Basic Loyalty bonus**: 
+**Basic Loyalty bonus**: 
 
 The basic loyalty bonus is a bonus credited to the basic account value, awarded periodically throughout the policy term. It is calculated as a percentage of the average basic account value over a specified consideration period.
 
-**Parameters:**
+- ***Parameters:***
 
-- basic_lb_rate_tbl: a table of bonus rates indexed by policy year, specifying the rate applied at each award occasion. Non-zero entries implicitly define both the award years and the award frequency. 
+  - basic_lb_rate_tbl: a table of bonus rates indexed by policy year, specifying the rate applied at each award occasion. Non-zero entries implicitly define both the award years and the award frequency. 
 
-- basic_lb_first_consid_period: the lookback window in months used to calculate the average basic account value for the **first award only**. E.g. 60 months.
+  - basic_lb_first_consid_period: the lookback window in months used to calculate the average basic account value for the **first award only**. E.g. 60 months.
 
-**Logic:**
+- ***Logic:***
 
-- Award occasions are determined by the non-zero entries in basic_lb_rate_tbl.
+  - Award occasions are determined by the non-zero entries in basic_lb_rate_tbl.
 
-- At the first award: the bonus is calculated as basic_lb_rate_tbl(first award year) × average bav over the past basic_lb_first_consid_period months.
+  - At the first award: the bonus is calculated as basic_lb_rate_tbl(first award year) × average bav over the past basic_lb_first_consid_period months.
 
-- At subsequent awards: the bonus is calculated as basic_lb_rate_tbl(t) × average bav since the last award. The consideration period is therefore always equal to the gap between consecutive award years in basic_lb_rate_tbl, converted to months.
+  - At subsequent awards: the bonus is calculated as basic_lb_rate_tbl(t) × average bav since the last award. The consideration period is therefore always equal to the gap between consecutive award years in basic_lb_rate_tbl, converted to months.
 
-- If the policy term does not reach the next award year, no partial bonus is awarded.
+  - If the policy term does not reach the next award year, no partial bonus is awarded.
 
-- **Top-up Loyalty bonus:**
+**Top-up Loyalty bonus:**
 
 The top-up loyalty bonus follows the same logic as the basic loyalty bonus, with two differences:
 
@@ -134,15 +134,15 @@ The top-up loyalty bonus follows the same logic as the basic loyalty bonus, with
 
 - It uses its own rate table and first consideration period.
 
-**Parameters:**
+- ***Parameters:***
 
-- topup_lb_rate_tbl: same structure as basic_lb_rate_tbl but for the top-up loyalty bonus.
+  - topup_lb_rate_tbl: same structure as basic_lb_rate_tbl but for the top-up loyalty bonus.
 
-- topup_lb_first_consid_period: same concept as basic_lb_first_consid_period but for the top-up loyalty bonus. This is currently set to 60, like basic LB.
+  - topup_lb_first_consid_period: same concept as basic_lb_first_consid_period but for the top-up loyalty bonus. This is currently set to 60, like basic LB.
 
-**Logic**: identical to the basic loyalty bonus, with tuav replacing bav and topup_lb_rate_tbl, topup_lb_first_consid_period replacing their basic counterparts.
+- ***Logic***: identical to the basic loyalty bonus, with tuav replacing bav and topup_lb_rate_tbl, topup_lb_first_consid_period replacing their basic counterparts.
 
-- **Special bonus as % of total COI charged**: 
+**Special bonus as % of total COI charged**: 
 
 The special bonus as % of total COI charged follows the same logic as the basic and top-up loyalty bonuses, with one difference:
 
@@ -150,37 +150,37 @@ The special bonus as % of total COI charged follows the same logic as the basic 
 
 Note that since COI is accumulated (not averaged), the consideration period effectively defines the window over which COI charges are summed.
 
-**Parameters:**
+- ***Parameters:***
 
-- sb_coi_rate_tbl: same structure as basic_lb_rate_tbl, a table of bonus rates indexed by policy year.
+  - sb_coi_rate_tbl: same structure as basic_lb_rate_tbl, a table of bonus rates indexed by policy year.
 
-- sb_coi_first_consid_period: the lookback window in months for the first award, e.g. 60 months (5 years). For subsequent awards, the consideration period is always equal to the gap between consecutive award years in sb_coi_rate_tbl.
+  - sb_coi_first_consid_period: the lookback window in months for the first award, e.g. 60 months (5 years). For subsequent awards, the consideration period is always equal to the gap between consecutive award years in sb_coi_rate_tbl.
 
-**Logic:** identical to the basic loyalty bonus, with:
+- ***Logic:*** identical to the basic loyalty bonus, with:
 
-- Total accumulated COI charged over the consideration period replacing average bav
+  - Total accumulated COI charged over the consideration period replacing average bav
 
-- sb_coi_rate_tbl and sb_coi_first_consid_period replacing their basic loyalty bonus counterparts
+  - sb_coi_rate_tbl and sb_coi_first_consid_period replacing their basic loyalty bonus counterparts
 
-**Example:** if sb_coi_rate_tbl has a rate of 50% at policy year 10 and sb_coi_first_consid_period = 60 months, then at the end of policy year 10 the bonus = 50% × total COI charged over the past 60 months.
+- ***Example:*** if sb_coi_rate_tbl has a rate of 50% at policy year 10 and sb_coi_first_consid_period = 60 months, then at the end of policy year 10 the bonus = 50% × total COI charged over the past 60 months.
 
-- **Special bonus as % of ACP**: 
+**Special bonus as % of ACP**: 
 
 The special bonus as % of ACP is a bonus credited to the account value at specified policy years, calculated as a percentage of the ACP.
 
-**Parameters:**
+- ***Parameters:***
 
-- sb_acp_rate_tbl: a table of bonus rates indexed by policy year. Non-zero entries define the award occasions. For example, a rate of 50% at policy year 10 means a bonus of 50% × ACP is credited at the end of policy year 10.
+  - sb_acp_rate_tbl: a table of bonus rates indexed by policy year. Non-zero entries define the award occasions. For example, a rate of 50% at policy year 10 means a bonus of 50% × ACP is credited at the end of policy year 10.
 
-**Logic:**
+- ***Logic:***
 
-- Award occasions are determined by the non-zero entries in sb_acp_rate_tbl.
+  - Award occasions are determined by the non-zero entries in sb_acp_rate_tbl.
 
-- At each award: bonus = sb_acp_rate_tbl(t) × acp.
+  - At each award: bonus = sb_acp_rate_tbl(t) × acp.
 
-- No consideration period or lookback window is needed since ACP is a fixed policy input.
+  - No consideration period or lookback window is needed since ACP is a fixed policy input.
 
-- For all bonuses: **Note that all bonuses will be paid to top-up account only.**
+**For all bonuses:** Note that all bonuses will be paid to top-up account only.
 
 ## Model assumptions
 
@@ -188,56 +188,46 @@ Scalar parameters for this section that are not suited to table format are defin
 
 ### The set of assumptions
 
-- **ULP Fund earned rate (ann_ulp_fer)**: the assumed fund earned rate for the policy account value (the unit fund), e.g., 4.5% p.a.
+**ULP Fund earned rate (ann\_ulp\_fer)**: the assumed fund earned rate for the policy account value (the unit fund), e.g., 4.5% p.a.
 
-- **SH Fund earned rate (ann_sh_fer)**: The assumed earned investment rate on the SH cashflows. E.g., 4.0% p.a.
+**SH Fund earned rate (ann\_sh\_fer)**: The assumed earned investment rate on the SH cashflows. E.g., 4.0% p.a.
 
-- **Operational expenses (op_exp_tbl.csv)**: Include the initial expense per policy, the initial expense as % of basic initial premium, the renewal expense per policy, the renewal expense as % of basic renewal premium. The initial expenses are incurred during policy year 1 and the renewal expenses are incurred from policy year 2 onwards. 
+**Operational expenses (op\_exp\_tbl.csv)**: Include the initial expense per policy, the initial expense as % of basic initial premium, the renewal expense per policy, the renewal expense as % of basic renewal premium. The initial expenses are incurred during policy year 1 and the renewal expenses are incurred from policy year 2 onwards. 
 
-- **Expense inflation**: E.g., 3% p.a.
+**Expense inflation**: E.g., 3% p.a.
 
-- **Fund management charge (ann_fmc_pc)**: E.g., 1.5% p.a.
+**Fund management charge (ann\_fmc\_pc)**: E.g., 1.5% p.a.
 
-- **Fund management expense (ann_fme_pc)**: E.g., 0.5% p.a.
+**Fund management expense (ann\_fme\_pc)**: E.g., 0.5% p.a.
 
-- **Commission (comm_tbl.csv)**: A table of commission rates for each policy year, for basic premium and topup premium. This should be a table that has the same format as the allocation charge.
+**Commission (comm\_tbl.csv)**: A table of commission rates for each policy year, for basic premium and topup premium. This should be a table that has the same format as the allocation charge.
 
-- **Overriding commission (ovrd_tbl.csv)**: A table of overriding commission rates for each policy year. This should be a table that has the same format as the commission and allocation charge. Note that, unlike commission and allocation charge, the table of overriding commission has only 1 row for the basic premium since it is not available for the top-up premium.
+**Overriding commission (ovrd\_tbl.csv)**: A table of overriding commission rates for each policy year. This should be a table that has the same format as the commission and allocation charge. Note that, unlike commission and allocation charge, the table of overriding commission has only 1 row for the basic premium since it is not available for the top-up premium.
 
-- **Valuation interest rate (ann_vir)**: rates used or reserving basis. E.g., 2% p.a.
+**Valuation interest rate (ann\_vir)**: rates used or reserving basis. E.g., 2% p.a.
 
-- **Risk discount rate (ann_rdr)**: E.g., 9% p.a.
+**Risk discount rate (ann\_rdr)**: E.g., 9% p.a.
 
-- **Regulatory parameters (reg_param_tbl.csv)**: This includes the Solvency margin parameters applied on the reserve and the SAR, and the tax rate. SM on res = 4%, SM on SAR = 0.3%, Tax rate = 20%.
+**Regulatory parameters (reg\_param\_tbl.csv)**: This includes the Solvency margin parameters applied on the reserve and the SAR, and the tax rate. SM on res = 4%, SM on SAR = 0.3%, Tax rate = 20%.
 
-- **Lapse rate (lapse_tbl.csv)**: This should be a table of lapse rate (%), with 2 dimensions of premium frequency and policy years. For example, a table of 11x4 (11 rows and 4 columns). Each row corresponds to the lapse rate of 4 ACP frequency modes for a specific policy year. 
+**Lapse rate (lapse\_tbl.csv)**: This should be a table of lapse rate (%), with 2 dimensions of premium frequency and policy years. For example, a table of 11x4 (11 rows and 4 columns). Each row corresponds to the lapse rate of 4 ACP frequency modes for a specific policy year. 
 
-- **Mortality rate (mortality_select_male.csv, mortality_select_female.csv)**:
-The model supports select-format mortality tables. Each table is provided separately for male and female lives, and the appropriate table is selected based on the sex of the life insured.
+**Mortality rate (mortality\_select\_male.csv, mortality\_select\_female.csv)**: The model supports select-format mortality tables. Each table is provided separately for male and female lives, and the appropriate table is selected based on the sex of the life insured.
  
-**Note on ultimate tables:** If users wish to use an ultimate mortality table (age-indexed only), it can be easily converted to select format by providing it as a single-column select table. The selection period will be S=0, and the lookup formula remains unchanged.
+***Note on ultimate tables:*** If users wish to use an ultimate mortality table (age-indexed only), it can be easily converted to select format by providing it as a single-column select table. The selection period will be S=0, and the lookup formula remains unchanged.
 
-**Ultimate table**
+***Ultimate table***
+- The ultimate table is a one-dimensional table indexed by attained age. The annual mortality rate for a life insured at a specific policy month is looked up directly using the attained age at that month.
 
-The ultimate table is a one-dimensional table indexed by attained age. The annual mortality rate for a life insured at a specific policy month is looked up directly using the attained age at that month.
-
-**Select table**
-
-The select table recognizes that recently underwritten lives have different mortality experience from lives that have been in force for a longer period. The selection effect is assumed to wear off after a **selection period S** (in years), after which the life is subject to the same mortality rates as unselected lives of the same attained age.
-
-The table is a two-dimensional table with:
-
-- Rows **indexed by select age, i.e., the age at entry into the select group.** It starts with age [x] = -S.
-
-- Columns indexed by duration since selection, from 0 to S, representing q[x] to q[x] + S. Columns 0 to S – 1 are the select columns; column S is the ultimate column.
-
-To look up the mortality rate at policy year k for a life who entered the policy at age x:
-
-- Row = x + max(0, k – 1 – S)
-
-- Col = min(k – 1, S)
-
-The rate is then read from the table at [row, col]. 
+***Select table***
+- The select table recognizes that recently underwritten lives have different mortality experience from lives that have been in force for a longer period. The selection effect is assumed to wear off after a **selection period S** (in years), after which the life is subject to the same mortality rates as unselected lives of the same attained age.
+- The table is a two-dimensional table with:
+  - Rows **indexed by select age, i.e., the age at entry into the select group.** It starts with age [x] = -S.
+  - Columns indexed by duration since selection, from 0 to S, representing q[x] to q[x] + S. Columns 0 to S – 1 are the select columns; column S is the ultimate column.
+- To look up the mortality rate at policy year k for a life who entered the policy at age x:
+  - Row = x + max(0, k – 1 – S)
+  - Col = min(k – 1, S)
+- The rate is then read from the table at [row, col]. 
 
 ***Interpretation:*** During the select period (duration < S), the row remains fixed at the entry age x and the column advances rightward by one for each policy year, i.e., the lookup moves horizontally across the select columns. Once the selection period is exhausted (duration >= S), the column is locked at the ultimate column S and the row advances downward by one for each additional policy year, i.e., the lookup moves vertically down the ultimate column, tracking the life’s increasing attained age.
 
@@ -254,16 +244,13 @@ For a life entering at age 30 with selection period S = 4:
 | 5 | 30 (Age[x] = 30) | 4 | q_30+4 (col qx+4) |
 | 6 | 31 (Age[x] = 31) | 4 | q_31+4 (col qx+4) |
 | 7 | 32 (Age[x] = 32) | 4 | q_32+4 (col qx+4) |
-
-**Selection period parameter:** The selection period S is automatically determined from the table structure (not encoded in the filename).
+***Selection period parameter:*** The selection period S is automatically determined from the table structure (not encoded in the filename).
  
-The mortality table should be a CSV file whose filename follows the pattern `mortality_select_[male|female].csv`. The model loader will automatically detect the selection period S from the number of data columns:
- 
-**S = (total_columns - 1) - 1 = total_columns - 2**
+The mortality table should be a CSV file whose filename follows the pattern `mortality_select_[male|female].csv`. The model loader will automatically detect the selection period S from the number of data columns:** S = (total\_columns - 1) - 1 = total\_columns - 2**
  
 Example: A CSV with 6 total columns (1 age + 5 data) has S = 4.
  
-**CSV structure:**
+***CSV structure:***
  
 - **Column 0 (age column):** Row labels named "age[x]", containing the entry age for each row
   - Integer values covering the required age range
@@ -273,6 +260,7 @@ Example: A CSV with 6 total columns (1 age + 5 data) has S = 4.
   - Select table: q[x], q[x]+1, q[x]+2, ..., q[x]+S (total: S+1 columns)
   - Ultimate table as select format (S=0): single data column
   - Column headers use square brackets except for the final column (which signals convergence to ultimate rates)
+
 If the filename does not match the pattern `mortality_select_[male|female].csv`, or if both filenames are missing, the model should return the error "no mortality table found".
  
 For users experimenting with ultimate mortality rates: provide them in select format with a single data column. The lookup formula remains the same, with S=0 implicitly.
@@ -283,41 +271,41 @@ For users experimenting with ultimate mortality rates: provide them in select fo
 
 In addition to the assumptions above, we should build a table of sensitivity factors that allows us to run sensitivity tests on these assumptions in a much faster and clearer way. Following sensitivity factors will be built in the model:
 
-- **Initial expense per policy (ie_pp_sen)**: Multiply to the assumption. Default: 100%.
+- **Initial expense per policy (ie\_pp\_sen)**: Multiply to the assumption. Default: 100%.
 
-- **Initial expense per premium (ie_pc_sen)**: Add to the assumption. Default: 0%
+- **Initial expense per premium (ie\_pc\_sen)**: Add to the assumption. Default: 0%
 
-- **Renewal expense per policy (re_pp_sen)**: Multiply to the assumption. Default: 100%.
+- **Renewal expense per policy (re\_pp\_sen)**: Multiply to the assumption. Default: 100%.
 
-- **Renewal expense per premium (re_pc_sen)**: Add to the assumption. Default: 0%
+- **Renewal expense per premium (re\_pc\_sen)**: Add to the assumption. Default: 0%
 
-- **Overall operational expense (op_exp_sen)**: Multiply to all operational expense assumptions. Default: 100%. Note that this sensitivity factor can be applied together with other sensitivity factors regarding to expenses (ie_pp_sen, ie_pc_sen, re_pp_sen, re_pc_sen). I.e., this can stack with other expense sensitivity factors.
+- **Overall operational expense (op\_exp\_sen)**: Multiply to all operational expense assumptions. Default: 100%. Note that this sensitivity factor can be applied together with other sensitivity factors regarding to expenses (ie_pp_sen, ie_pc_sen, re_pp_sen, re_pc_sen). I.e., this can stack with other expense sensitivity factors.
 
-- **Expense inflation (inf_sen):** Add to the assumption. Default: 0%
+- **Expense inflation (inf\_sen):** Add to the assumption. Default: 0%
 
-- **Fund management expense (fme_sen)**: Add to the assumption. Default: 0%
+- **Fund management expense (fme\_sen)**: Add to the assumption. Default: 0%
 
-- **Commission (comm_sen)**: Multiply to the assumption. Default: 100%. This is applicable to basic premium only.
+- **Commission (comm\_sen)**: Multiply to the assumption. Default: 100%. This is applicable to basic premium only.
 
-- **Overriding (ovrd_sen)**: Multiply to the assumption. Default: 100%.
+- **Overriding (ovrd\_sen)**: Multiply to the assumption. Default: 100%.
 
-- **Mortality rate (mort_sen)**: Multiply to the assumption. Default: 100%.
+- **Mortality rate (mort\_sen)**: Multiply to the assumption. Default: 100%.
 
-- **ULP Fund earned rate (ulp_fer_sen)**: Add to the assumption. Default: 0%
+- **ULP Fund earned rate (ulp\_fer\_sen)**: Add to the assumption. Default: 0%
 
-- **SH Fund earned rate (sh_fer_sen)**: Add to the assumption. Default: 0%
+- **SH Fund earned rate (sh\_fer\_sen)**: Add to the assumption. Default: 0%
 
-- **Lapse (lapse_sen)**: Multiply to the assumption. Default: 100%.
+- **Lapse (lapse\_sen)**: Multiply to the assumption. Default: 100%.
 
-- **RDR (rdr_sen)**: Add to the assumption. Default: 0%
+- **RDR (rdr\_sen)**: Add to the assumption. Default: 0%
 
-- **VIR (vir_sen)**: Add to the assumption. Default: 0%
+- **VIR (vir\_sen)**: Add to the assumption. Default: 0%
 
-- **Fund management charge (fmc_sen)**: Add to the assumption. Default: 0%
+- **Fund management charge (fmc\_sen)**: Add to the assumption. Default: 0%
 
 The table holds all these sensitivity factors will look like this:
 
-| Scenario ID | **op_exp_sen** | **ie_pp_sen** | **ie_pc_sen** | **re_pp_sen** | **re_pc_sen** | **inf_sen** | … | **vir_sen** | **fmc_sen** |
+| Scenario ID | **op\_exp\_sen** | **ie\_pp\_sen** | **ie\_pc\_sen** | **re\_pp\_sen** | **re\_pc\_sen** | **inf\_sen** | … | **vir\_sen** | **fmc\_sen** |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | 100 | 100 | 0 | 100 | 0 | 0 | … | 0 | 0 |
 | 2 |  |  |  |  |  |  | … |  |  |
@@ -351,114 +339,61 @@ The following calculation logic is for a single policy projection.
 
 The overall summary graph is as below.
 
-==================================================================================
-
+```
 CROSS-PART DEPENDENCY SUMMARY (REFINED)
-
-=========================================
-
+ 
 Part 3 (SH Cashflows)
-
   |
-
   +── depends on ──► Part 2 (Decrements)
-
   |                    key variables: no_pols_ifsm(t), no_pols_if(t),
-
   |                                   no_deaths(t), no_surrs(t), no_mats(t)
-
   |
-
   +── depends on ──► Part 1 (PAV)
-
                        key variables from Part 1:
-
                          av_ab(t)          [S1.81] → unit_res_bgn, unit_res_end, mat_outgo
-
-                         bav_bval_bb(t)    [S1.44] → death_ben_pp, surr_ben_pp, g_death_ben_pp, 
-
-                                                     g_surr_ben_pp
-
-                         tuav_bval_bb(t)   [S1.52] → death_ben_pp, surr_ben_pp, g_death_ben_pp, 
-
-                                                     g_surr_ben_pp
-
-                         g_bav_bval(t)     [S1.60] → g_death_ben_pp, g_surr_ben_pp, 
-
-                                                     cog_adj_g_bav
-
-                         g_tuav_bval(t)    [S1.61] → g_death_ben_pp, g_surr_ben_pp, 
-
-                                                     cog_adj_g_tuav
-
+                         bav_bval_bb(t)    [S1.44] → death_ben_pp, surr_ben_pp, g_death_ben_pp, g_surr_ben_pp
+                         tuav_bval_bb(t)   [S1.52] → death_ben_pp, surr_ben_pp, g_death_ben_pp, g_surr_ben_pp
+                         g_bav_bval(t)     [S1.60] → g_death_ben_pp, g_surr_ben_pp, cog_adj_g_bav
+                         g_tuav_bval(t)    [S1.61] → g_death_ben_pp, g_surr_ben_pp, cog_adj_g_tuav
                          g_bav_ab(t)       [S1.64] → cog_mat
-
                          g_tuav_ab(t)      [S1.65] → cog_mat
-
                          av_ad(t)          [S1.43] → invt_exp_if, unit_inc
-
                          tot_dedn_act(t)   [S1.27] → non_unit_inc
-
                          basic_alloc_chg_pp(t) [S1.6]  → non_unit_inc
-
                          topup_alloc_chg_pp(t) [S1.8]  → non_unit_inc
-
                          basic_prem_pp(t)  [S1.4]  → basic_prem_if → prem_inc_if, expenses, comm
-
                          topup_prem_pp(t)  [S1.5]  → topup_prem_if → prem_inc_if, comm
-
                          is_inforce_bgn(t) [S1.1]  → non_unit_inc, unit_res_bgn
-
                          m_ulp_fer(t)      [S1.46] → unit_inc
-
                          current_db_opt(t) [S1.40] → death_ben_pp, g_death_ben_pp
 
 Part 2 (Decrements)
-
   |
-
   +── depends on ──► Part 1 (PAV)
-
                        key variables from Part 1:
-
                          is_inforce_end(t) [S1.2]  → m_lapse_rate (lapse-due-to-AV condition)
-
                          av_ad(t)          [S1.43] → is_inforce_end → no_surrs (indirect)
 
 Part 1 (PAV)
-
   └── no dependency on Parts 2 or 3  [self-contained]
 
 EXECUTION ORDER:  Part 1 → Part 2 → Part 3  (within each month t)
 
 PASS STRUCTURE:
-
   Part 1:  single forward pass  t = 0 → T
-
   Part 2:  single forward pass  t = 0 → T
-
-  Part 3:  
-
-           pass 1 (forward)  t = 0 → T   compute S3.1 – S3.49  (cf_before_zv)
-
+  Part 3:  pass 1 (forward)  t = 0 → T   compute S3.1 – S3.49  (cf_before_zv)
            pass 2 (backward) t = T → 0   compute S3.50         (zeroising_res_if)
-
            pass 3 (forward)  t = 0 → T   compute S3.54 – S3.64 (cf_after_zv … cf_after_scr)
-
            pass 4 (backward) t = T → 0   compute S3.65, S3.69  (pv_cf_after_scr, pv_prem_inc)
-
-==================================================================================
+```
 
 The model is constructed for monthly time steps.
 
 The number of years projected by the model should be configurable. Let’s consider a projected year of 90 years. Then, there should be 1081 time steps (90*12 + 1). The month t will be from 0 to 1081. The first projection year will start from month t = 1. Month t = 0 is used in some calculations for convenience. At t = 0, all variables are 0, except for the following variables:
-
 - (S1.2) is_inforce_end(0) = 1
-
 - (S2.2) no_pols_if(0) = init_pols_if
-
 - (S3.65) pv_cf_after_scr(0): the present value of cashflows after solvency capital requirements per 1 policy at the outset.
-
 - (S3.69) pv_prem_inc(0): the present value of premium incomes per 1 policy at the outset
 
 If necessary, all values before t = 0 are also treated as 0. For some variables where the values at 0 are particularly necessary for the calculations, their values at t = 0 can be stated explicitly in the computation tables even if they are 0.
@@ -470,17 +405,12 @@ Policy year at month t: pol_year(t) = ceil(t/12) for t >= 1.
 Insured age at month t: attained_age(t) = age_at_entry + ceil(t/12) – 1 for t >= 1. At t = 0, insured age = age at entry.
 
 For example, if the age at entry is 30:
-
 - at policy month 10: policy year = 1, insured age = 30
-
 - at policy month 29: policy year = 3, insured age = 32
 
 The model for a single policy includes 3 parts:
-
 - Projection of policy account value
-
 - Construction of the decrements
-
 - Projection of the shareholders’ cash flows
 
 Let prem_freq_mths denote the number of months between consecutive premium due dates, derived from prem_freq as follows: Annual → 12, Semi-annual → 6, Quarterly → 3, Monthly → 1. This integer is used in the lapse rate calculations below.
@@ -493,109 +423,63 @@ Policy account value (PAV) is projected for all months, assuming that this is 1 
 
 The computation logic for each month is described below.
 
+```
 PAV PROJECTION — COMPUTATION DEPENDENCY TREE
 
-=============================================
-
-Legend: 
-
-(t-1) = value from prior month  |  [input] = policy/param input  |  [table] = lookup
-
-bav_ab(t)  ─────────────────────────────────────────────────────────────────────────
-
+Legend:
+(t-1) = value from prior month  |  [input] = policy/param input  |  [table] = lookup
+ 
+bav_ab(t)  ─────────────────────────────────────────────────────────────────────────
 └── bav_aval_bb(t)
-
-    ├── bav_bval_bb(t)
-
-    │   ├── bav_ad(t)
-
-    │   │   ├── bav_bd(t)
-
-    │   │   │   ├── bav_ab(t-1)                     ← (t-1)
-
-    │   │   │   └── basic_alloc_prem(t)
-
-    │   │   │       ├── basic_alloc_prem_b4_dedncf(t)
-
-    │   │   │       │   ├── basic_prem_pp(t)        ← [input: ACP, freq, prem_term]
-
-    │   │   │       │   └── basic_alloc_chg_pp(t)   ← [table: alloc_charge]
-
-    │   │   │       └── basic_dedncf_clrd(t)
-
-    │   │   │           └── tot_dedncf(t-1)         ← (t-1)
-
-    │   │   └── basic_dedn(t)
-
-    │   │       ├── totdedn(t)
-
-    │   │       │   ├── mort_coi(t)
-
-    │   │       │   │   ├── sar_mort(t)
-
-    │   │       │   │   │   ├── dthben_coi(t)       ← [input: DB option, SA]
-
-    │   │       │   │   │   └── bav_coi(t)
-
-    │   │       │   │   ├── ann_mort_coi(t)         ← [table: COI, sex, age]
-
-    │   │       │   │   └── mort_loading            ← [input]
-
-    │   │       │   └── admin_chg(t)                ← [input: start, inc, cap]
-
-    │   │       └── bav_bd(t)                       ← see above
-
-    │   └── m_unit_gth(t)
-
-    │       ├── m_ulp_fer(t)                        ← [input: ann_ulp_fer, sens]
-
-    │       └── m_fmc_pc                            ← [input: ann_fmc_pc, sens]
-
-    └── cog_adj_bav(t)
-
-        ├── bav_ad(t)                               ← see above
-
-        ├── m_hard_gtee(t)                          ← [table: hard_gtee_rate]
-
-        └── m_unit_gth(t)                           ← see above
-
-tuav_ab(t)  ────────────────────────────────────────────────────────────────────────
-
-└── tuav_aval_bb(t)  [mirrors bav structure, omitted for brevity]
-
+    ├── bav_bval_bb(t)
+    │   ├── bav_ad(t)
+    │   │   ├── bav_bd(t)
+    │   │   │   ├── bav_ab(t-1)                     ← (t-1)
+    │   │   │   └── basic_alloc_prem(t)
+    │   │   │       ├── basic_alloc_prem_b4_dedncf(t)
+    │   │   │       │   ├── basic_prem_pp(t)        ← [input: ACP, freq, prem_term]
+    │   │   │       │   └── basic_alloc_chg_pp(t)   ← [table: alloc_charge]
+    │   │   │       └── basic_dedncf_clrd(t)
+    │   │   │           └── tot_dedncf(t-1)         ← (t-1)
+    │   │   └── basic_dedn(t)
+    │   │       ├── totdedn(t)
+    │   │       │   ├── mort_coi(t)
+    │   │       │   │   ├── sar_mort(t)
+    │   │       │   │   │   ├── dthben_coi(t)       ← [input: DB option, SA]
+    │   │       │   │   │   └── bav_coi(t)
+    │   │       │   │   ├── ann_mort_coi(t)         ← [table: COI, sex, age]
+    │   │       │   │   └── mort_loading            ← [input]
+    │   │       │   └── admin_chg(t)                ← [input: start, inc, cap]
+    │   │       └── bav_bd(t)                       ← see above
+    │   └── m_unit_gth(t)
+    │       ├── m_ulp_fer(t)                        ← [input: ann_ulp_fer, sens]
+    │       └── m_fmc_pc                            ← [input: ann_fmc_pc, sens]
+    └── cog_adj_bav(t)
+        ├── bav_ad(t)                               ← see above
+        ├── m_hard_gtee(t)                          ← [table: hard_gtee_rate]
+        └── m_unit_gth(t)                           ← see above
+ 
+tuav_ab(t)  ────────────────────────────────────────────────────────────────────────
+└── tuav_aval_bb(t)  [mirrors bav structure, omitted for brevity]
 └── bonus_alloc(t)
-
-    ├── basic_lb(t)       ← avg_bav_lb over consideration period
-
-    ├── topup_lb(t)       ← avg_tuav_lb over consideration period
-
-    ├── sb_coi(t)         ← tot_coi_sb over consideration period
-
-    ├── sb_acp(t)         ← [input: ACP, table: sb_acp_rate]
-
-    └── bonus_dedncf_clrd(t)
-
-        └── tot_dedncf_b4_bonus(t)
-
-            └── tot_dedncf(t-1)                     ← (t-1)
-
-tot_dedncf(t)  ─────────────────────────────────────────────────────────────────────
-
+    ├── basic_lb(t)       ← avg_bav_lb over consideration period
+    ├── topup_lb(t)       ← avg_tuav_lb over consideration period
+    ├── sb_coi(t)         ← tot_coi_sb over consideration period
+    ├── sb_acp(t)         ← [input: ACP, table: sb_acp_rate]
+    └── bonus_dedncf_clrd(t)
+        └── tot_dedncf_b4_bonus(t)
+            └── tot_dedncf(t-1)                     ← (t-1)
+ 
+tot_dedncf(t)  ─────────────────────────────────────────────────────────────────────
 ├── tot_dedncf_b4_bonus(t)
-
-│   ├── tot_dedncf(t-1)                             ← (t-1)
-
-│   ├── dedncf(t)
-
-│   │   ├── totdedn(t)                              ← see above
-
-│   │   └── dedn(t)
-
-│   ├── basic_dedncf_clrd(t)                        ← see above
-
-│   └── topup_dedncf_clrd(t)                        ← mirrors basic
-
-└── bonus_dedncf_clrd(t)                            ← see above
+│   ├── tot_dedncf(t-1)                             ← (t-1)
+│   ├── dedncf(t)
+│   │   ├── totdedn(t)                              ← see above
+│   │   └── dedn(t)
+│   ├── basic_dedncf_clrd(t)                        ← see above
+│   └── topup_dedncf_clrd(t)                        ← mirrors basic
+└── bonus_dedncf_clrd(t)                            ← see above
+```
 
 ### Computation table
 
@@ -772,30 +656,22 @@ tot_dedncf(t)  ─────────────────────�
 ### Further notes
 
 **On timing of the cash flows:**
-
 - It is assumed that everything happening before applying the crediting rate happens at the beginning of the month.
-
 - Anything happening after applying the crediting rate happens at the end of the month.
 
 This means that:
-
 - Premiums, allocation charge, deductions carried forward cleared by allocated premiums, admin charge, COI happen at the beginning of the month.
-
 - Validation of hard guaranteed investment rates, bonuses credited, deductions carried forward cleared by credited bonuses happen at the end of the month.
 
-**Deduction rules:**
+**(1) Deduction rules:**
 
 In each policy month, admin charge and cost of insurance charge (mortality COI) will be deducted from the policy account value. 
-
 - It will be first deducted from the basic account. The maximum that can be deducted is just the basic account value at that time.
-
 - Any leftover charges that cannot be funded by basic account will be deducted from the top-up account. Again, the maximum that can be deducted is just the top-up account value at that time.
-
 - Any remaining amount will be carried forward. Within the no-lapse guaranteed period, as long as the premiums are paid on time, these excess deductions can be carried forward for an unlimited time period. After the no-lapse guaranteed period, it can be carried forward for the maximum of 2 months. If it cannot be fully cleared after 2 months, then the policy will terminate.
-
 - The deductions carried forward will be deducted whenever there is an amount going into account value. Any premiums paid will first have to pay allocation charge, then will be used to clear any deductions carried forward at that time before going into account value. Similarly, any bonuses incurred will be used to clear any deductions carried forward at that time before going into account value. The maximum deductions carried forward that can be cleared cannot exceed the premium after allocation charge or the bonuses incurred.
 
-**Calculation of COI**
+**(2) Calculation of COI**
 
 COI is calculated based on the basic account only.
 
@@ -803,103 +679,69 @@ Between admin charge and COI, admin charge is deducted first and then COI.
 
 Hence, COI is calculated based on the basic account value after deducting the admin charge. This basic account value will be used to determine the death benefit and the sum at risk used to compute COI. 
 
-**The Guarantee mechanism**
+**(3) The Guarantee mechanism**
 
 The calculations here do not affect the projection of the policy account value but will be used in assessing the cost of guarantee later. Since the guarantee is hard guarantee, at any time point, if the actual earned rate for the policyholder is lower than the guaranteed rate, the account value will be adjusted accordingly and if the actual earned rate is higher than the guaranteed rate, the guaranteed account value will also be adjusted accordingly.
 
 Note that the guaranteed account value is calculated based on the cash flows that actually arise for the normal account value. In other words, allocated premiums, deductions, bonuses are all the same as the ones used for the normal account value.
 
-**Bonus**
+**(4) Bonus**
 
 All bonuses are paid into top-up account value only, after clearing deductions carried forward if any.
 
-**The calculation of the SB as % of total COI**
+**(5) The calculation of the SB as % of total COI**
 
 tot_coi_sb(t) is based on mort_coi(t), which is the full COI charge computed for the month regardless of whether it was successfully deducted from the account value or carried forward as dedncf. In other words, it uses the gross COI incurred, not the net amount actually taken from the account. 
 
 ## Construction of the decrements
 
 The computation logic for each month is described below.
-
-==================================================================================
-
+```
 PART 2 — DECREMENTS — COMPUTATION DEPENDENCY TREE
 
-===================================================
-
 Legend:
-
-  (t-1)   = value from prior month
-
-  [P1]    = variable computed in Part 1
-
-  [input] = policy / param input
-
-  [table] = assumption table lookup
-
-no_pols_ifsm(t)  [S2.1]
-
-  ├── no_pols_if(t-1)                           ← (t-1)  [S2.2]
-
-  └── no_mats(t-1)                              ← (t-1)  [S2.5]
-
-no_mats(t)  [S2.5]
-
-  └── no_pols_if(t)                             ← same t  [S2.2]
-
-      (non-zero only when t = pol_term × 12)    ← [input]
-
-no_deaths(t)  [S2.3]
-
-  ├── no_pols_ifsm(t)                           ← [S2.1]
-
-  └── m_death_rate(t)  [S2.6]
-
-        └── ann_death_rate(t)  [S2.7]
-
-              ├── q_death_base(t)               ← [table: mortality, age, sex, pol_year]  [S2.8]
-
-              └── q_death_sen                   ← [table: sensitivity factors]  [S2.9]
-
-no_surrs(t)  [S2.4]
-
-  ├── no_pols_ifsm(t)                           ← [S2.1]
-
-  ├── no_deaths(t)                              ← [S2.3]
-
-  └── m_lapse_rate(t)  [S2.10]
-
-        ├── is_inforce_end(t)                   ← [P1: S1.2]  (lapse-due-to-AV termination)
-
-        ├── pol_term, prem_term, prem_freq_mths ← [input]
-
-        └── ann_lapse_rate(t)  [S2.11]
-
-              ├── w_base(t)                     ← [table: lapse, pol_year, prem_freq]  [S2.12]
-
-              └── w_sen                         ← [table: sensitivity factors]  [S2.13]
-
-no_pols_if(t)  [S2.2]
-
-  ├── no_pols_ifsm(t)                           ← [S2.1]
-
-  ├── no_deaths(t)                              ← [S2.3]
-
-  └── no_surrs(t)                               ← [S2.4]
-
-  (at t = 0: init_pols_if from policy inputs)
-
+  (t-1)   = value from prior month
+  [P1]    = variable computed in Part 1
+  [input] = policy / param input
+  [table] = assumption table lookup
+ 
+no_pols_ifsm(t)  [S2.1]
+  ├── no_pols_if(t-1)                           ← (t-1)  [S2.2]
+  └── no_mats(t-1)                              ← (t-1)  [S2.5]
+ 
+no_mats(t)  [S2.5]
+  └── no_pols_if(t)                             ← same t  [S2.2]
+      (non-zero only when t = pol_term × 12)    ← [input]
+ 
+no_deaths(t)  [S2.3]
+  ├── no_pols_ifsm(t)                           ← [S2.1]
+  └── m_death_rate(t)  [S2.6]
+        └── ann_death_rate(t)  [S2.7]
+              ├── q_death_base(t)               ← [table: mortality, age, sex, pol_year]  [S2.8]
+              └── q_death_sen                   ← [table: sensitivity factors]  [S2.9]
+ 
+no_surrs(t)  [S2.4]
+  ├── no_pols_ifsm(t)                           ← [S2.1]
+  ├── no_deaths(t)                              ← [S2.3]
+  └── m_lapse_rate(t)  [S2.10]
+        ├── is_inforce_end(t)                   ← [P1: S1.2]  (lapse-due-to-AV termination)
+        ├── pol_term, prem_term, prem_freq_mths ← [input]
+        └── ann_lapse_rate(t)  [S2.11]
+              ├── w_base(t)                     ← [table: lapse, pol_year, prem_freq]  [S2.12]
+              └── w_sen                         ← [table: sensitivity factors]  [S2.13]
+ 
+no_pols_if(t)  [S2.2]
+  ├── no_pols_ifsm(t)                           ← [S2.1]
+  ├── no_deaths(t)                              ← [S2.3]
+  └── no_surrs(t)                               ← [S2.4]
+  (at t = 0: init_pols_if from policy inputs)
+ 
 CIRCULAR NOTE: no_mats(t) references no_pols_if(t) at the same t.
-
-  Resolution: no_mats(t) is non-zero only at t = pol_term × 12,
-
-  where no_pols_if is computed first and then immediately released
-
-  as maturities. In practice, evaluate no_pols_if(t) then no_mats(t)
-
-  in sequence within each time step.
-
-==================================================================================
+  Resolution: no_mats(t) is non-zero only at t = pol_term × 12,
+  where no_pols_if is computed first and then immediately released
+  as maturities. In practice, evaluate no_pols_if(t) then no_mats(t)
+  in sequence within each time step.
+```
 
 ### Computation table
 
@@ -939,15 +781,15 @@ CIRCULAR NOTE: no_mats(t) references no_pols_if(t) at the same t.
 
 ### Further notes
 
-**Number of surrendered policies**
+**(1) Number of surrendered policies**
 
 This includes policies lapsed due to account value becoming 0 after grace period after no-lapse guaranteed period (this is explained in more details in the note about timing of lapse later). For prudence, this is assumed to happen after all expected deaths since the death benefit, by design, is always larger than or equal to the surrender benefit.
 
-**Conversion of the annual mortality rate to the monthly rate**
+**(2) Conversion of the annual mortality rate to the monthly rate**
 
 The annual mortality rate is conversed into the monthly rate based on the assumption of constant force of mortality. It assumes that the force of mortality is constant between integer ages.
 
-**Timing of lapse**
+**(3) Timing of lapse**
 
 The first condition covers the situation where the policy lapses due to the account value becoming insufficient for deductions.
 
@@ -956,11 +798,8 @@ The second condition assumes that there will be no lapses at the end of the very
 The third condition assumes that outside of the premium term, the lapses will occur every month across the year. The conversion of the annual lapse rate to the monthly lapse rate assumes constant force of lapse. It assumes that the force of lapses is constant between integer policy years.
 
 In addition to these 3 situations, within the premium term, the policy is assumed to lapse only at the end of the month, that is right before the next due month. 
-
 - If a policy has annual frequency, the due month will be 1, 13, 25, etc. and the potential lapse months will accordingly be 12, 24 and so on. 
-
 - Similarly, if the premium due month is 1, 7, 13, 19, 25, etc. for semi-annual, and 1, 4, 7, 10, 13, 16, 19, 22, 25, etc. for quarterly, then the potential lapse months will be 6, 12, 18, 24, and so on for semi-annual, and 3, 6, 9, 12, 15, 18, 21, 24, and so on for quarterly.
-
 - If the premium frequency is monthly, then the lapse is assumed to happen every month across the year.
 
 The conversion of the annual lapse rate into the installment lapse rates assumes constant force of lapse. It assumes that once the lapse occurs, the force of lapse is constant between installments of lapse in that policy year.
@@ -968,420 +807,251 @@ The conversion of the annual lapse rate into the installment lapse rates assumes
 ## Projection of the SH Cashflows
 
 The computation logic for each month is described below.
-
-==================================================================================
-
+```
 PART 3 — SH CASHFLOWS — COMPUTATION DEPENDENCY TREE
-
-=====================================================
-
+ 
 Legend:
-
-  (t-1)   = value from prior month
-
-  [P1]    = variable computed in Part 1
-
-  [P2]    = variable computed in Part 2
-
-  [input] = policy / param input
-
-  [table] = assumption table lookup
-
-  ◄ BACK  = computed in a backward pass
-
+  (t-1)   = value from prior month
+  [P1]    = variable computed in Part 1
+  [P2]    = variable computed in Part 2
+  [input] = policy / param input
+  [table] = assumption table lookup
+  ◄ BACK  = computed in a backward pass
+ 
 ──────────────────────────────────────────────────────────────
-
-PASS 1 — FORWARD  (t = 0 → T)
-
+PASS 1 — FORWARD  (t = 0 → T)
 ──────────────────────────────────────────────────────────────
-
+ 
 ── PREMIUM INCOME ──
-
-prem_inc_if(t)  [S3.1]
-
-  ├── basic_prem_if(t)  [S3.2]
-
-  │     ├── basic_prem_pp(t)                    ← [P1: S1.4]
-
-  │     └── no_pols_ifsm(t)                     ← [P2: S2.1]
-
-  └── topup_prem_if(t)  [S3.3]
-
-        ├── topup_prem_pp(t)                    ← [P1: S1.5]
-
-        └── no_pols_ifsm(t)                     ← [P2: S2.1]
-
+ 
+prem_inc_if(t)  [S3.1]
+  ├── basic_prem_if(t)  [S3.2]
+  │     ├── basic_prem_pp(t)                    ← [P1: S1.4]
+  │     └── no_pols_ifsm(t)                     ← [P2: S2.1]
+  └── topup_prem_if(t)  [S3.3]
+        ├── topup_prem_pp(t)                    ← [P1: S1.5]
+        └── no_pols_ifsm(t)                     ← [P2: S2.1]
+ 
 ── OPERATIONAL EXPENSES ──
-
-op_init_exp_if(t)  [S3.4]  (policy year 1 only)
-
-  ├── ie_fixed                                  ← [table: S3.5]
-
-  ├── ie_pp_sen                                 ← [table: S3.6]
-
-  ├── ie_pc                                     ← [table: S3.7]
-
-  ├── ie_pc_sen                                 ← [table: S3.8]
-
-  ├── op_exp_sen                                ← [table: S3.9]
-
-  ├── no_pols_ifsm(t)                           ← [P2: S2.1]
-
-  └── basic_prem_if(t)                          ← [S3.2]
-
-op_ren_exp_if(t)  [S3.10]  (policy year 2+ only)
-
-  ├── re_fixed                                  ← [table: S3.11]
-
-  ├── re_pp_sen                                 ← [table: S3.12]
-
-  ├── re_pc                                     ← [table: S3.13]
-
-  ├── re_pc_sen                                 ← [table: S3.14]
-
-  ├── op_exp_sen                                ← [table: S3.9]
-
-  ├── exp_inflation(t)  [S3.15]
-
-  │     ├── inf_pc                              ← [table: S3.16]
-
-  │     └── inf_sen                             ← [table: S3.17]
-
-  ├── no_pols_ifsm(t)                           ← [P2: S2.1]
-
-  └── basic_prem_if(t)                          ← [S3.2]
-
+ 
+op_init_exp_if(t)  [S3.4]  (policy year 1 only)
+  ├── ie_fixed                                  ← [table: S3.5]
+  ├── ie_pp_sen                                 ← [table: S3.6]
+  ├── ie_pc                                     ← [table: S3.7]
+  ├── ie_pc_sen                                 ← [table: S3.8]
+  ├── op_exp_sen                                ← [table: S3.9]
+  ├── no_pols_ifsm(t)                           ← [P2: S2.1]
+  └── basic_prem_if(t)                          ← [S3.2]
+ 
+op_ren_exp_if(t)  [S3.10]  (policy year 2+ only)
+  ├── re_fixed                                  ← [table: S3.11]
+  ├── re_pp_sen                                 ← [table: S3.12]
+  ├── re_pc                                     ← [table: S3.13]
+  ├── re_pc_sen                                 ← [table: S3.14]
+  ├── op_exp_sen                                ← [table: S3.9]
+  ├── exp_inflation(t)  [S3.15]
+  │     ├── inf_pc                              ← [table: S3.16]
+  │     └── inf_sen                             ← [table: S3.17]
+  ├── no_pols_ifsm(t)                           ← [P2: S2.1]
+  └── basic_prem_if(t)                          ← [S3.2]
+ 
 ── INVESTMENT EXPENSE ──
-
-invt_exp_if(t)  [S3.18]
-
-  ├── av_ad(t)                                  ← [P1: S1.43]
-
-  ├── m_fme_pc(t)  [S3.19]
-
-  │     ├── ann_fme_pc                          ← [table: S3.20]
-
-  │     └── fme_sen                             ← [table: S3.21]
-
-  └── no_pols_ifsm(t)                           ← [P2: S2.1]
-
-── COMMISSIONS ──
-
-comm_if(t)  [S3.22]
-
-  ├── comm_basic_pc(t)                          ← [table: S3.23]
-
-  ├── comm_sen                                  ← [table: S3.24]
-
-  ├── comm_topup_pc(t)                          ← [table: S3.25]
-
-  ├── basic_prem_if(t)                          ← [S3.2]
-
-  └── topup_prem_if(t)                          ← [S3.3]
-
-ovrd_if(t)  [S3.26]
-
-  ├── ovrd_pc(t)                                ← [table: S3.27]
-
-  ├── ovrd_sen                                  ← [table: S3.28]
-
-  └── basic_prem_if(t)                          ← [S3.2]
-
+ 
+invt_exp_if(t)  [S3.18]
+  ├── av_ad(t)                                  ← [P1: S1.43]
+  ├── m_fme_pc(t)  [S3.19]
+  │     ├── ann_fme_pc                          ← [table: S3.20]
+  │     └── fme_sen                             ← [table: S3.21]
+  └── no_pols_ifsm(t)                           ← [P2: S2.1]
+ 
+ ── COMMISSIONS ──
+ 
+comm_if(t)  [S3.22]
+  ├── comm_basic_pc(t)                          ← [table: S3.23]
+  ├── comm_sen                                  ← [table: S3.24]
+  ├── comm_topup_pc(t)                          ← [table: S3.25]
+  ├── basic_prem_if(t)                          ← [S3.2]
+  └── topup_prem_if(t)                          ← [S3.3]
+ 
+ovrd_if(t)  [S3.26]
+  ├── ovrd_pc(t)                                ← [table: S3.27]
+  ├── ovrd_sen                                  ← [table: S3.28]
+  └── basic_prem_if(t)                          ← [S3.2]
+ 
 ── TERMINATION OUTGOS ──
-
-death_outgo(t)  [S3.29]
-
-  ├── death_ben_pp(t)  [S3.30]
-
-  │     ├── current_db_opt(t)                   ← [P1: S1.40]
-
-  │     ├── sum_assd                            ← [input: S1.38]
-
-  │     ├── lien_pc(t)                          ← [P1: S1.39]
-
-  │     ├── bav_bval_bb(t)                      ← [P1: S1.44]
-
-  │     └── tuav_bval_bb(t)                     ← [P1: S1.52]
-
-  └── no_deaths(t)                              ← [P2: S2.3]
-
-surr_outgo(t)  [S3.31]
-
-  ├── surr_ben_pp(t)  [S3.32]
-
-  │     ├── bav_bval_bb(t)                      ← [P1: S1.44]
-
-  │     ├── tuav_bval_bb(t)                     ← [P1: S1.52]
-
-  │     └── surr_chg_pp(t)  [S3.33]
-
-  │           ├── surr_chg_pc(t)                ← [table: S3.34]
-
-  │           ├── ACP                           ← [input]
-
-  │           └── bav_bval_bb(t)                ← [P1: S1.44]
-
-  └── no_surrs(t)                               ← [P2: S2.4]
-
-mat_outgo(t)  [S3.35]
-
-  ├── av_ab(t)                                  ← [P1: S1.81]
-
-  └── no_mats(t)                                ← [P2: S2.5]
-
+ 
+death_outgo(t)  [S3.29]
+  ├── death_ben_pp(t)  [S3.30]
+  │     ├── current_db_opt(t)                   ← [P1: S1.40]
+  │     ├── sum_assd                            ← [input: S1.38]
+  │     ├── lien_pc(t)                          ← [P1: S1.39]
+  │     ├── bav_bval_bb(t)                      ← [P1: S1.44]
+  │     └── tuav_bval_bb(t)                     ← [P1: S1.52]
+  └── no_deaths(t)                              ← [P2: S2.3]
+ 
+surr_outgo(t)  [S3.31]
+  ├── surr_ben_pp(t)  [S3.32]
+  │     ├── bav_bval_bb(t)                      ← [P1: S1.44]
+  │     ├── tuav_bval_bb(t)                     ← [P1: S1.52]
+  │     └── surr_chg_pp(t)  [S3.33]
+  │           ├── surr_chg_pc(t)                ← [table: S3.34]
+  │           ├── ACP                           ← [input]
+  │           └── bav_bval_bb(t)                ← [P1: S1.44]
+  └── no_surrs(t)                               ← [P2: S2.4]
+ 
+mat_outgo(t)  [S3.35]
+  ├── av_ab(t)                                  ← [P1: S1.81]
+  └── no_mats(t)                                ← [P2: S2.5]
+ 
 ── COST OF GUARANTEE AT TERMINATION ──
-
-cog_term_adj(t)  [S3.36]
-
-  ├── cog_death(t)  [S3.37]
-
-  │     ├── g_death_ben_pp(t)  [S3.38]
-
-  │     │     ├── current_db_opt(t)             ← [P1: S1.40]
-
-  │     │     ├── sum_assd                      ← [input]
-
-  │     │     ├── lien_pc(t)                    ← [P1: S1.39]
-
-  │     │     ├── g_bav_bval(t)                 ← [P1: S1.60]
-
-  │     │     └── g_tuav_bval(t)                ← [P1: S1.61]
-
-  │     ├── death_ben_pp(t)                     ← [S3.30]
-
-  │     └── no_deaths(t)                        ← [P2: S2.3]
-
-  ├── cog_surr(t)  [S3.39]
-
-  │     ├── g_surr_ben_pp(t)  [S3.40]
-
-  │     │     ├── g_bav_bval(t)                 ← [P1: S1.60]
-
-  │     │     ├── g_tuav_bval(t)                ← [P1: S1.61]
-
-  │     │     ├── surr_chg_pc(t)                ← [table: S3.34]
-
-  │     │     └── ACP                           ← [input]
-
-  │     ├── surr_ben_pp(t)                      ← [S3.32]
-
-  │     └── no_surrs(t)                         ← [P2: S2.4]
-
-  └── cog_mat(t)  [S3.41]
-
-        ├── g_bav_ab(t)                         ← [P1: S1.64]
-
-        ├── g_tuav_ab(t)                        ← [P1: S1.65]
-
-        ├── av_ab(t)                            ← [P1: S1.81]
-
-        └── no_mats(t)                          ← [P2: S2.5]
-
-── RESERVES AND INVESTMENT INCOME ──
-
-unit_res_bgn(t)  [S3.42]
-
-  ├── av_ab(t-1)                                ← (t-1) [P1: S1.81]
-
-  ├── is_inforce_bgn(t)                         ← [P1: S1.1]
-
-  └── no_pols_ifsm(t)                           ← [P2: S2.1]
-
-unit_res_end(t)  [S3.43]
-
-  ├── av_ab(t)                                  ← [P1: S1.81]
-
-  └── no_pols_if(t)                             ← [P2: S2.2]
-
-  (zero at t = pol_term × 12)
-
-unit_inc(t)  [S3.44]
-
-  ├── av_ad(t)                                  ← [P1: S1.43]
-
-  ├── m_ulp_fer(t)                              ← [P1: S1.46]
-
-  └── no_pols_ifsm(t)                           ← [P2: S2.1]
-
-non_unit_inc(t)  [S3.45]
-
-  ├── basic_alloc_chg_pp(t)                     ← [P1: S1.6]
-
-  ├── topup_alloc_chg_pp(t)                     ← [P1: S1.8]
-
-  ├── tot_dedn_act(t)                           ← [P1: S1.27]
-
-  ├── no_pols_ifsm(t)                           ← [P2: S2.1]
-
-  ├── op_init_exp_if(t)                         ← [S3.4]
-
-  ├── op_ren_exp_if(t)                          ← [S3.10]
-
-  ├── invt_exp_if(t)                            ← [S3.18]
-
-  ├── comm_if(t)                                ← [S3.22]
-
-  ├── ovrd_if(t)                                ← [S3.26]
-
-  ├── m_sh_fer(t)  [S3.46]
-
-  │     ├── ann_sh_fer(t)                       ← [table: S3.47]
-
-  │     └── sh_fer_sen                          ← [table: S3.48]
-
-  └── is_inforce_bgn(t)                         ← [P1: S1.1]
-
+ 
+cog_term_adj(t)  [S3.36]
+  ├── cog_death(t)  [S3.37]
+  │     ├── g_death_ben_pp(t)  [S3.38]
+  │     │     ├── current_db_opt(t)             ← [P1: S1.40]
+  │     │     ├── sum_assd                      ← [input]
+  │     │     ├── lien_pc(t)                    ← [P1: S1.39]
+  │     │     ├── g_bav_bval(t)                 ← [P1: S1.60]
+  │     │     └── g_tuav_bval(t)                ← [P1: S1.61]
+  │     ├── death_ben_pp(t)                     ← [S3.30]
+  │     └── no_deaths(t)                        ← [P2: S2.3]
+  ├── cog_surr(t)  [S3.39]
+  │     ├── g_surr_ben_pp(t)  [S3.40]
+  │     │     ├── g_bav_bval(t)                 ← [P1: S1.60]
+  │     │     ├── g_tuav_bval(t)                ← [P1: S1.61]
+  │     │     ├── surr_chg_pc(t)                ← [table: S3.34]
+  │     │     └── ACP                           ← [input]
+  │     ├── surr_ben_pp(t)                      ← [S3.32]
+  │     └── no_surrs(t)                         ← [P2: S2.4]
+  └── cog_mat(t)  [S3.41]
+        ├── g_bav_ab(t)                         ← [P1: S1.64]
+        ├── g_tuav_ab(t)                        ← [P1: S1.65]
+        ├── av_ab(t)                            ← [P1: S1.81]
+        └── no_mats(t)                          ← [P2: S2.5]
+ 
+ ── RESERVES AND INVESTMENT INCOME ──
+ 
+unit_res_bgn(t)  [S3.42]
+  ├── av_ab(t-1)                                ← (t-1) [P1: S1.81]
+  ├── is_inforce_bgn(t)                         ← [P1: S1.1]
+  └── no_pols_ifsm(t)                           ← [P2: S2.1]
+ 
+unit_res_end(t)  [S3.43]
+  ├── av_ab(t)                                  ← [P1: S1.81]
+  └── no_pols_if(t)                             ← [P2: S2.2]
+  (zero at t = pol_term × 12)
+ 
+unit_inc(t)  [S3.44]
+  ├── av_ad(t)                                  ← [P1: S1.43]
+  ├── m_ulp_fer(t)                              ← [P1: S1.46]
+  └── no_pols_ifsm(t)                           ← [P2: S2.1]
+ 
+non_unit_inc(t)  [S3.45]
+  ├── basic_alloc_chg_pp(t)                     ← [P1: S1.6]
+  ├── topup_alloc_chg_pp(t)                     ← [P1: S1.8]
+  ├── tot_dedn_act(t)                           ← [P1: S1.27]
+  ├── no_pols_ifsm(t)                           ← [P2: S2.1]
+  ├── op_init_exp_if(t)                         ← [S3.4]
+  ├── op_ren_exp_if(t)                          ← [S3.10]
+  ├── invt_exp_if(t)                            ← [S3.18]
+  ├── comm_if(t)                                ← [S3.22]
+  ├── ovrd_if(t)                                ← [S3.26]
+  ├── m_sh_fer(t)  [S3.46]
+  │     ├── ann_sh_fer(t)                       ← [table: S3.47]
+  │     └── sh_fer_sen                          ← [table: S3.48]
+  └── is_inforce_bgn(t)                         ← [P1: S1.1]
+ 
 ── CASHFLOW BEFORE ZEROISING RESERVE ──
-
-cf_before_zv(t)  [S3.49]
-
-  ├── unit_res_bgn(t)                           ← [S3.42]
-
-  ├── prem_inc_if(t)                            ← [S3.1]
-
-  ├── unit_inc(t)                               ← [S3.44]
-
-  ├── non_unit_inc(t)                           ← [S3.45]
-
-  ├── op_init_exp_if(t)                         ← [S3.4]
-
-  ├── op_ren_exp_if(t)                          ← [S3.10]
-
-  ├── invt_exp_if(t)                            ← [S3.18]
-
-  ├── comm_if(t)                                ← [S3.22]
-
-  ├── ovrd_if(t)                                ← [S3.26]
-
-  ├── death_outgo(t)                            ← [S3.29]
-
-  ├── surr_outgo(t)                             ← [S3.31]
-
-  ├── mat_outgo(t)                              ← [S3.35]
-
-  ├── cog_term_adj(t)                           ← [S3.36]
-
-  └── unit_res_end(t)                           ← [S3.43]
-
+ 
+cf_before_zv(t)  [S3.49]
+  ├── unit_res_bgn(t)                           ← [S3.42]
+  ├── prem_inc_if(t)                            ← [S3.1]
+  ├── unit_inc(t)                               ← [S3.44]
+  ├── non_unit_inc(t)                           ← [S3.45]
+  ├── op_init_exp_if(t)                         ← [S3.4]
+  ├── op_ren_exp_if(t)                          ← [S3.10]
+  ├── invt_exp_if(t)                            ← [S3.18]
+  ├── comm_if(t)                                ← [S3.22]
+  ├── ovrd_if(t)                                ← [S3.26]
+  ├── death_outgo(t)                            ← [S3.29]
+  ├── surr_outgo(t)                             ← [S3.31]
+  ├── mat_outgo(t)                              ← [S3.35]
+  ├── cog_term_adj(t)                           ← [S3.36]
+  └── unit_res_end(t)                           ← [S3.43]
+ 
 ──────────────────────────────────────────────────────────────
-
-PASS 2 — BACKWARD  (t = T → 0)   ◄ BACK
-
+PASS 2 — BACKWARD  (t = T → 0)   ◄ BACK
 ──────────────────────────────────────────────────────────────
-
-zeroising_res_if(t)  [S3.50]  ◄ BACK
-
-  ├── zeroising_res_if(t+1)                     ← (t+1)  [S3.50]
-
-  ├── cf_before_zv(t+1)                         ← (t+1)  [S3.49](fully populated in Pass 1)
-
-  ├── m_vir(t+1)  [S3.51]
-
-  │     ├── ann_vir(t+1)                        ← [table: S3.52]
-
-  │     └── vir_sen                             ← [table: S3.53]
-
-  └── is_inforce_end(t)                         ← [P1: S1.2]
-
-  (zero at t = pol_term × 12)
-
+ 
+zeroising_res_if(t)  [S3.50]  ◄ BACK
+  ├── zeroising_res_if(t+1)                     ← (t+1)  [S3.50]
+  ├── cf_before_zv(t+1)                         ← (t+1)  [S3.49](fully populated in Pass 1)
+  ├── m_vir(t+1)  [S3.51]
+  │     ├── ann_vir(t+1)                        ← [table: S3.52]
+  │     └── vir_sen                             ← [table: S3.53]
+  └── is_inforce_end(t)                         ← [P1: S1.2]
+  (zero at t = pol_term × 12)
+ 
 ──────────────────────────────────────────────────────────────
-
-PASS 3 — FORWARD  (t = 0 → T)   resumes after backward pass
-
+PASS 3 — FORWARD  (t = 0 → T)   resumes after backward pass
 ──────────────────────────────────────────────────────────────
-
-cf_after_zv(t)  [S3.54]
-
-  ├── cf_before_zv(t)                           ← [S3.49]
-
-  ├── zeroising_res_if(t)                       ← [S3.50]  ◄ BACK
-
-  ├── zeroising_res_if(t-1)                     ← (t-1) [S3.50]
-
-  └── m_vir(t)                                  ← [S3.51]
-
-op_tax(t)  [S3.55]
-
-  ├── tax_pc                                    ← [table: S3.56]
-
-  └── cf_after_zv(t)                            ← [S3.54]
-
-cf_after_tax(t)  [S3.57]
-
-  ├── cf_after_zv(t)                            ← [S3.54]
-
-  └── op_tax(t)                                 ← [S3.55]
-
-tot_res_if(t)  [S3.58]
-
-  ├── unit_res_end(t)                           ← [S3.43]
-
-  └── zeroising_res_if(t)                       ← [S3.50]  ◄ BACK
-
-solv_cap_req(t)  [S3.59]
-
-  ├── solv_marg_res                             ← [table: S3.60]
-
-  ├── solv_marg_sar                             ← [table: S3.61]
-
-  ├── tot_res_if(t)                             ← [S3.58]
-
-  ├── death_ben_pp(t)                           ← [S3.30]
-
-  ├── no_pols_if(t)                             ← [P2: S2.2]
-
-  └── is_inforce_end(t)                         ← [P1: S1.2]
-
-  (zero at t = pol_term × 12)
-
-scr_inv_inc(t)  [S3.62]
-
-  ├── solv_cap_req(t-1)                         ← (t-1) [S3.59]
-
-  └── m_sh_fer(t)                               ← [S3.46]
-
-scr_inc_tax(t)  [S3.63]
-
-  ├── tax_pc                                    ← [table: S3.56]
-
-  └── scr_inv_inc(t)                            ← [S3.62]
-
-cf_after_scr(t)  [S3.64]
-
-  ├── cf_after_tax(t)                           ← [S3.57]
-
-  ├── solv_cap_req(t-1)                         ← (t-1) [S3.59]
-
-  ├── solv_cap_req(t)                           ← [S3.59]
-
-  ├── scr_inv_inc(t)                            ← [S3.62]
-
-  └── scr_inc_tax(t)                            ← [S3.63]
-
+ 
+cf_after_zv(t)  [S3.54]
+  ├── cf_before_zv(t)                           ← [S3.49]
+  ├── zeroising_res_if(t)                       ← [S3.50]  ◄ BACK
+  ├── zeroising_res_if(t-1)                     ← (t-1) [S3.50]
+  └── m_vir(t)                                  ← [S3.51]
+ 
+op_tax(t)  [S3.55]
+  ├── tax_pc                                    ← [table: S3.56]
+  └── cf_after_zv(t)                            ← [S3.54]
+ 
+cf_after_tax(t)  [S3.57]
+  ├── cf_after_zv(t)                            ← [S3.54]
+  └── op_tax(t)                                 ← [S3.55]
+ 
+tot_res_if(t)  [S3.58]
+  ├── unit_res_end(t)                           ← [S3.43]
+  └── zeroising_res_if(t)                       ← [S3.50]  ◄ BACK
+ 
+solv_cap_req(t)  [S3.59]
+  ├── solv_marg_res                             ← [table: S3.60]
+  ├── solv_marg_sar                             ← [table: S3.61]
+  ├── tot_res_if(t)                             ← [S3.58]
+  ├── death_ben_pp(t)                           ← [S3.30]
+  ├── no_pols_if(t)                             ← [P2: S2.2]
+  └── is_inforce_end(t)                         ← [P1: S1.2]
+  (zero at t = pol_term × 12)
+ 
+scr_inv_inc(t)  [S3.62]
+  ├── solv_cap_req(t-1)                         ← (t-1) [S3.59]
+  └── m_sh_fer(t)                               ← [S3.46]
+ 
+scr_inc_tax(t)  [S3.63]
+  ├── tax_pc                                    ← [table: S3.56]
+  └── scr_inv_inc(t)                            ← [S3.62]
+ 
+cf_after_scr(t)  [S3.64]
+  ├── cf_after_tax(t)                           ← [S3.57]
+  ├── solv_cap_req(t-1)                         ← (t-1) [S3.59]
+  ├── solv_cap_req(t)                           ← [S3.59]
+  ├── scr_inv_inc(t)                            ← [S3.62]
+  └── scr_inc_tax(t)                            ← [S3.63]
+ 
 ──────────────────────────────────────────────────────────────
-
-PASS 4 — BACKWARD  (t = T → 0)   ◄ BACK
-
+PASS 4 — BACKWARD  (t = T → 0)   ◄ BACK
 ──────────────────────────────────────────────────────────────
-
-pv_cf_after_scr(t)  [S3.65]  ◄ BACK
-
-  ├── cf_after_scr(k), k = t+1 … T             ← [S3.64]  (fully populated in Pass 3)
-
-  └── m_rdr(t)  [S3.66]
-
-        ├── ann_rdr(t)                          ← [table: S3.67]
-
-        └── rdr_sen                             ← [table: S3.68]
-
-pv_prem_inc(t)  [S3.69]  ◄ BACK
-
-  ├── prem_inc_if(k), k = t+1 … T              ← [S3.1]   (fully populated in Pass 1)
-
-  └── m_rdr(t)                                  ← [S3.66]
-
-==================================================================================
+ 
+pv_cf_after_scr(t)  [S3.65]  ◄ BACK
+  ├── cf_after_scr(k), k = t+1 … T             ← [S3.64]  (fully populated in Pass 3)
+  └── m_rdr(t)  [S3.66]
+        ├── ann_rdr(t)                          ← [table: S3.67]
+        └── rdr_sen                             ← [table: S3.68]
+ 
+pv_prem_inc(t)  [S3.69]  ◄ BACK
+  ├── prem_inc_if(k), k = t+1 … T              ← [S3.1]   (fully populated in Pass 1)
+  └── m_rdr(t)                                  ← [S3.66]
+```
 
 ### Computation table
 
@@ -1531,50 +1201,38 @@ pv_prem_inc(t)  [S3.69]  ◄ BACK
 
 ### Further notes
 
-**Timing of death, lapse, mat and bonus.**
+**(1) Timing of death, lapse, mat and bonus.**
 
 The model assumes that deaths, lapses, maturity, validation of hard guaranteed interest rates and bonuses all happen at the end of the month. However, it assumes an order of occurrence for these events. Specifically:
-
 - First, the validation of hard guaranteed interest rates is assumed to happen first. 
-
 - Then deaths are assumed to happen next, and lapses are assumed to happen right after deaths. However, when calculating expected death and surrender outgoes, the account values used are those that are **before** validation. This is to separate the cost of validation explicitly to the outgoes of cost of guarantee at termination. This is represented by the bridging algorithm designed in calculating the cost of guarantee at termination.
-
 - Bonuses are assumed to happen after deaths and surrenders. Hence, all policies that are in-force at the end of the month will be reserved by the account value after bonus (the final account value calculated in each month).
-
 - The maturity is assumed to happen after bonuses. At the end of the month after bonuses, if the policy is not due yet, the account value after bonuses will be held as reserves. Otherwise, if the policy matures, the account value after bonuses will be paid as the maturity benefit.
 
 The unit reserves held at the start of each month are equal to the account value after bonuses at the end of the previous month.
 
-**Cost of guarantee incurred to adjust the account value**
+**(2) Cost of guarantee incurred to adjust the account value**
 
 The cost of guarantee incurred to adjust the account value is implicitly accounted for by the mechanism of holding the account value after bonuses as reserves at the end of each month.
 
-**The investment income earned on SH cashflows in month t**
+**(3) The investment income earned on SH cashflows in month t**
 
 In any month t, all the SH cash inflows at the start of the month, after deducting all cash outflows incurred at the start of that month, will be used to invest to earn interest at the assumed SH Fund earned rate provided in model assumptions.
 
 The cash inflows for SH at the start of the month include:
-
 - Allocation charges from basic and top-up premiums.
-
 - Total deductions successfully deducted at the start of the month, including new admin charge and COI charge for that month and the deductions carried forward cleared from the allocated premiums.
 
 The cash outflows for SH at the start of the month include:
-
 - The operational expenses, either initial expenses or renewal expenses, and the investment expenses.
-
 - The commissions and overriding commissions.
 
-**Calculation of the zeroising reserve (the non-unit reserve)**
+**(4) Calculation of the zeroising reserve (the non-unit reserve)**
 
 The zeroising reserve (ZV) is calculated based on the full projected value of the CF before ZV as follows:
-
 - It starts with the last projection month in which the CF before ZV becomes negative.
-
 - An amount of ZV is set up at the start of that month, effectively the end of the previous month, so that it is sufficient, allowing for earned investment income in the month (assuming to be based on the valuation interest rate), to “zeroize” the negative CF.
-
 - This amount of ZV is then deducted from the net CF at the end of the previous month.
-
 - The process continues to wok backwards, with each negative being “zeroized” accordingly.
 
 Note that, for simplification and illustration, we assume here that, to calculate the CF before ZV used for the calculation of the ZV, the reserving basis is the same as the projection basis. 
@@ -1585,17 +1243,17 @@ Common differences between the reserving basis and the projection basis may be i
 
 This may indicate the need to encapsulate the projection of policy account value per policy, the construction of decrements and the calculation of the cashflow used to compute zeroising reserve (ZV) into some independent modules so that we can easily reuse it later. For example, in a standard model, we may first call the modules using the valuation basis to compute zeroising reserves on a per-policy basis and then call them again on the projection basis. The CF after ZV will be calculated using the CF before ZV calculated under the projection basis and the ZV calculated based on the CF before ZV under the reserving basis.
 
-- **Zeroising reserve backward pass**
+**(5) Zeroising reserve backward pass**
 
 zeroising_res_if(t) cannot be computed in the same forward pass as the other Part 3 variables. It requires a two-pass approach: (1) a forward pass computing all variables from S3.1 through S3.49 to fully populate cf_before_zv(t) for all projection months, followed by (2) a backward pass starting from the last projection month and working back to t = 1 to compute zeroising_res_if(t). All variables from S3.54 onward depend on this backward pass and must therefore also be computed in or after the second pass. The variable cf_before_zv must be fully stored in memory before the backward pass begins.
 
-- **Solvency capital requirements**
+**(6) Solvency capital requirements**
 
 The solvency capital requirement is assumed to follow a simplified version of Solvency I in which prescribed risk parameters will be applied to reserves and sum at risk of in-force policies to determine the minimum capital that needs to be held.
 
 The increase in solvency capital requirements, i.e., the cashflow incurred to set up the solvency capital, is not taxable. However, the investment income earned on solvency capital will still be taxable.
 
-- **The discounted values**
+**(7) The discounted values**
 
 These are computed in a backward pass after cf_after_scr(t) is fully populated for all t. pv_cf_after_scr(0) is the primary output representing the total EPV of the profit signature at inception. Values at t > 0 represent the prospective EPV conditional on surviving to month t and are retained as diagnostic outputs. The discount factor applied at each step is (1 + m_rdr(t))^(-1) where m_rdr is computed from the annual RDR and its sensitivity factor.
 
@@ -1621,52 +1279,38 @@ The key metrics printed to the console at the end of a run depend on the output 
 
 - **Summary mode**
 
-At the end of each scenario run, the following metrics are printed to the console for immediate reference, in addition to being available in the output files.
+  - At the end of each scenario run, the following metrics are printed to the console for immediate reference, in addition to being available in the output files.
+    - *Present value of future profits*: PV Profits = pv_cf_after_scr(0)
+    - *Present value of future premiums*: PV Premiums = pv_prem_inc(0)
+    - *Profit margin*: Profit Margin = pv_cf_after_scr(0) / pv_prem_inc(0)
+    - *Annual Premium Equivalent (APE)*: APE = Σ [ACP × init_pols_if] (non-single-pay) + 10% × Σ [ACP × init_pols_if] (single-pay) + 10% × Σ [ATP × init_pols_if] 
+      - APE is calculated as 100% of basic premium for non-single-pay and 10% of basic premium for single-pay where a policy is classified as single-pay if prem_term = 1 and prem_freq_mths = 12 (prem_freq is Annual). APE will only account for 10% of ATP regardless of the top-up term.
+    - *Margin on APE*: Margin on APE = pv_cf_after_scr(0) / APE
+    - Total time taken to process
 
-- *Present value of future profits*: PV Profits = pv_cf_after_scr(0)
-
-- *Present value of future premiums*: PV Premiums = pv_prem_inc(0)
-
-- *Profit margin*: Profit Margin = pv_cf_after_scr(0) / pv_prem_inc(0)
-
-- *Annual Premium Equivalent (APE)*: APE = Σ [ACP × init_pols_if] (non-single-pay) + 10% × Σ [ACP × init_pols_if] (single-pay) + 10% × Σ [ATP × init_pols_if] 
-
-APE is calculated as 100% of basic premium for non-single-pay and 10% of basic premium for single-pay where a policy is classified as single-pay if prem_term = 1 and prem_freq_mths = 12 (prem_freq is Annual). APE will only account for 10% of ATP regardless of the top-up term.
-
-- *Margin on APE*: Margin on APE = pv_cf_after_scr(0) / APE
-
-- Total time taken to process
-
-When multiple scenarios are run, these metrics are printed for each scenario in turn, with the scenario ID displayed alongside each set of results.
+  - When multiple scenarios are run, these metrics are printed for each scenario in turn, with the scenario ID displayed alongside each set of results.
 
 - **Per-policy mode**
 
-At the end of the run, the following operational metrics are printed to the console:
+  - At the end of the run, the following operational metrics are printed to the console:
+    - Total number of policies processed
+    - Total time taken to process
 
-- Total number of policies processed
-
-- Total time taken to process
-
-These metrics serve primarily to confirm that the run is completed correctly and to assess processing performance.
+  - These metrics serve primarily to confirm that the run is completed correctly and to assess processing performance.
 
 - **Stochastic mode**
 
-At the end of the stochastic run, the following distributional metrics are printed to the console for pv_cf_after_scr(0) across all simulations:
+  - At the end of the stochastic run, the following distributional metrics are printed to the console for pv_cf_after_scr(0) across all simulations:
+    - Mean
+    - Standard deviation
+    - Selected percentiles: P5, P25, P50, P75, P95
+    - Expected shortfall (ES) at P90, P95 and P99.5, defined as the average of the simulated values falling below the corresponding percentile threshold
 
-- Mean
-
-- Standard deviation
-
-- Selected percentiles: P5, P25, P50, P75, P95
-
-- Expected shortfall (ES) at P90, P95 and P99.5, defined as the average of the simulated values falling below the corresponding percentile threshold
-
-The ES figures are reported on the profit signature, so a lower (more negative) ES indicates a worse tail outcome. Note that reliable estimation of tail metrics, particularly P99.5 ES, requires a sufficiently large number of simulations. As a general guide, a minimum of 10,000 simulations is recommended for P95 ES and 50,000 or more for P99.5 ES. These recommendations should be revisited once the stochastic design is finalised.
+  - The ES figures are reported on the profit signature, so a lower (more negative) ES indicates a worse tail outcome. Note that reliable estimation of tail metrics, particularly P99.5 ES, requires a sufficiently large number of simulations. As a general guide, a minimum of 10,000 simulations is recommended for P95 ES and 50,000 or more for P99.5 ES. These recommendations should be revisited once the stochastic design is finalised.
 
 ## Summary outputs
 
 When the model runs a projection of a portfolio of policies, the following variables are accumulated across all policies for each time step from t = 0 to the end of the projection period, under each scenario. These include the decrement counts from Part 2 and all cashflow, reserve, and present value variables from Part 3. Part 1 per-policy variables are intermediate inputs to Parts 2 and 3 and are not written to the summary output file.
-
 | **Step** | **Variable** |
 | --- | --- |
 | S2.1 | no_pols_ifsm(t) |
@@ -1709,7 +1353,7 @@ The accumulated results for each scenario are written to a CSV file named by sce
 
 The scenario ID from the sensitivity scenario table is used as the file identifier, ensuring a direct 1-to-1 mapping between the input scenario table and the output files. Each file contains one row per time step in the following format:
 
-| **t** | **no_pols_ifsm(t)** | **no_pols_if(t)** | **…** | **pv_cf_after_scr(t)** | **pv_prem_inc(t)** |
+| **t** | **no\_pols\_ifsm(t)** | **no\_pols\_if(t)** | **…** | **pv\_cf\_after\_scr(t)** | **pv\_prem\_inc(t)** |
 | --- | --- | --- | --- | --- | --- |
 | 0 |  |  |  |  |  |
 | 1 |  |  |  |  |  |
@@ -1742,8 +1386,7 @@ The output is written to a Parquet file for efficiency. The file contains one ro
 
 # Appendix
 
-The tables mentioned in 2.2 and 2.3 are described as follows.
-
+The tables mentioned in the sections Product features and Model assumptions are described as follows.
 | **Table** | **Filename** | **Description** |
 | --- | --- | --- |
 | Allocation charge | alloc_chg_tbl.csv | Allocation charge rate by policy year, for basic and topup premium. Columns: pol_year, basic_prem, topup_prem. Unit: %. The last row in the file applies to that policy year and all subsequent policy years. |
