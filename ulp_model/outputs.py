@@ -148,49 +148,57 @@ def write_summary_outputs(
 # ---------------------------------------------------------------------------
 
 def write_per_policy_outputs(
-    part1: dict,
     part2: dict,
     part3: dict,
     policy_ids: torch.Tensor,
+    summary_keys: list[str],
     scenario_id: int,
     output_dir: str,
-    output_batch_size: int = 1000,
+    n_scenarios: int = 1,
 ) -> None:
-    """Write per-policy outputs in batches to avoid memory exhaustion.
+    """Write per-policy outputs to a single CSV file in summary format.
 
-    Each output file contains a subset of policies. The key variables
-    written are pv_cf_after_scr and pv_prem_inc (at t=0), plus a
-    selection of time-series data.
+    Format: policy_id, t, then all variables (in summary order).
+    Each policy has MAX_PROJ_MONTHS rows (one per time step).
+
+    Parameters
+    ----------
+    part2           : Part 2 outputs dict {key: [B, T] tensor}
+    part3           : Part 3 outputs dict {key: [B, T] tensor}
+    policy_ids      : [B] tensor of policy IDs
+    summary_keys    : ordered list of variable names to write
+    scenario_id     : integer scenario identifier
+    output_dir      : directory path for output files
+    n_scenarios     : total number of scenarios (used for file naming)
     """
     out_path = Path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
 
+    n_digits = len(str(n_scenarios))
+    fname = out_path / f"per_policy_scen{scenario_id:0{n_digits}d}.csv"
+
     B = policy_ids.shape[0]
-    n_batches = math.ceil(B / output_batch_size)
+    # Merge part2 and part3 for easy key lookup
+    all_outputs = {**part2, **part3}
+    T = max(v.shape[1] for v in all_outputs.values() if hasattr(v, "shape"))
 
-    ts_keys_p3 = ["prem_inc_if", "cf_before_zv", "cf_after_scr"]
+    with open(fname, "w", newline="", encoding="utf-8") as f:
+        # Header: policy_id, t, then all summary variables
+        header = ["policy_id", "t"] + summary_keys
+        f.write(",".join(header) + "\n")
 
-    for batch_idx in range(n_batches):
-        start = batch_idx * output_batch_size
-        end = min(start + output_batch_size, B)
-        pids = policy_ids[start:end]
-        T = part3["pv_cf_after_scr"].shape[1]
-
-        fname = out_path / f"per_policy_scen{scenario_id:04d}_batch{batch_idx:04d}.csv"
-        with open(fname, "w", newline="", encoding="utf-8") as f:
-            header_parts = ["policy_id", "pv_cf_after_scr_t0", "pv_prem_inc_t0"]
-            for k in ts_keys_p3:
-                for t in range(min(T, 24)):
-                    header_parts.append(f"{k}_t{t}")
-            f.write(",".join(header_parts) + "\n")
-
-            for i in range(end - start):
-                b = start + i
-                pid_val = int(pids[i])
-                pv_cf = float(part3["pv_cf_after_scr"][b, 0])
-                pv_pi = float(part3["pv_prem_inc"][b, 0])
-                row = [str(pid_val), f"{pv_cf:.6f}", f"{pv_pi:.6f}"]
-                for k in ts_keys_p3:
-                    for t in range(min(T, 24)):
-                        row.append(f"{float(part3[k][b, t]):.6f}")
+        # Write data: one row per (policy, time step)
+        for b in range(B):
+            pid = int(policy_ids[b])
+            for t in range(T):
+                row = [str(pid), str(t)]
+                for k in summary_keys:
+                    if k in all_outputs:
+                        v = all_outputs[k]
+                        if t < v.shape[1]:
+                            row.append(f"{float(v[b, t]):.6f}")
+                        else:
+                            row.append("0")
+                    else:
+                        row.append("0")
                 f.write(",".join(row) + "\n")
