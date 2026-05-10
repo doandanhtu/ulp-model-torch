@@ -82,9 +82,9 @@ def print_metrics(
 
     pv_cf = _t0("pv_cf_after_scr")
     pv_prem = _t0("pv_prem_inc")
-    total_prem = _total("prem_inc_if")
-    total_death = _total("death_outgo")
-    total_surr = _total("surr_outgo")
+    # total_prem = _total("prem_inc_if")
+    # total_death = _total("death_outgo")
+    # total_surr = _total("surr_outgo")
 
     print(f"\n{'='*60}")
     print(f" Scenario {scenario_id:>4d} | Elapsed: {elapsed_time:.2f}s")
@@ -92,12 +92,13 @@ def print_metrics(
     print(f"  APE                : {ape:>20,.0f}")
     print(f"  PV Cashflow (t=0)  : {pv_cf:>20,.0f}")
     print(f"  PV Prem Inc (t=0)  : {pv_prem:>20,.0f}")
-    print(f"  Total Prem Inc     : {total_prem:>20,.0f}")
-    print(f"  Total Death Outgo  : {total_death:>20,.0f}")
-    print(f"  Total Surr Outgo   : {total_surr:>20,.0f}")
+    # print(f"  Total Prem Inc     : {total_prem:>20,.0f}")
+    # print(f"  Total Death Outgo  : {total_death:>20,.0f}")
+    # print(f"  Total Surr Outgo   : {total_surr:>20,.0f}")
     if pv_prem != 0.0 and not math.isnan(pv_prem):
         vif_over_ape = pv_cf / ape if ape != 0.0 else float("nan")
         print(f"  VIF / APE          : {vif_over_ape:>20.4f}")
+        print(f"  VIF / PV Prem Inc  : {(pv_cf / pv_prem):>20.4f}")
     print(f"{'='*60}\n")
 
 
@@ -126,7 +127,9 @@ def write_summary_outputs(
     n_digits = len(str(n_scenarios))
     fname = out_path / f"summary_scen{scenario_id:0{n_digits}d}.csv"
 
-    keys = sorted(summary_data.keys())
+    # Preserve the order of summary variables as provided by the model
+    # pipeline / specification, rather than sorting alphabetically.
+    keys = list(summary_data.keys())
     T = max(v.shape[0] for v in summary_data.values() if hasattr(v, "shape"))
 
     with open(fname, "w", newline="", encoding="utf-8") as f:
