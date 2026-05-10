@@ -19,7 +19,7 @@ results/
 .DS_Store
 
 # Spec document
-*.docx
+# *.docx
 
 .claude/
 *.zip
