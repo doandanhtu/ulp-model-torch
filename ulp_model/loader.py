@@ -341,6 +341,110 @@ def load_policy_batch(
     )
 
 
+# ---------------------------------------------------------------------------
+# Batch iterator for large portfolios
+# ---------------------------------------------------------------------------
+
+class PolicyBatchIterator:
+    """Iterates over a policy file in fixed-size batches.
+
+    The full DataFrame is loaded once into pandas (CPU RAM) and each batch
+    is sliced and converted to a PolicyBatch on demand, allowing the GPU to
+    hold only one batch's worth of tensors at a time.
+
+    Parameters
+    ----------
+    config : SimpleNamespace
+        Model config (policy_inputs_file, float_precision, compute_device).
+    batch_size : int
+        Number of policies per iteration.  If the total number of policies is
+        ≤ batch_size the iterator yields exactly one batch (no behavioural
+        difference from the non-batched path).
+    device : torch.device
+    dtype  : torch.dtype
+    """
+
+    _REQUIRED_COLS = [
+        "policy_id", "age_at_entry", "sex", "pol_term", "prem_term",
+        "prem_freq", "sum_assd", "db_opt", "acp", "atp",
+        "topup_term", "topup_freq", "mort_loading", "init_pols_if",
+    ]
+
+    def __init__(
+        self,
+        config,
+        batch_size: int,
+        device: torch.device,
+        dtype: torch.dtype,
+    ) -> None:
+        import pandas as pd
+
+        pol_file = Path(config.policy_inputs_file)
+        if not pol_file.exists():
+            raise FileNotFoundError(
+                f"Policy input file not found: '{pol_file}'. "
+                f"Check policy_inputs_file in your config."
+            )
+
+        suffix = pol_file.suffix.lower()
+        if suffix == ".parquet":
+            self._df = pd.read_parquet(pol_file)
+        elif suffix == ".csv":
+            self._df = pd.read_csv(pol_file)
+        else:
+            raise ValueError(
+                f"Unsupported policy file format '{suffix}' in '{pol_file}'. "
+                f"Supported formats: .csv, .parquet"
+            )
+
+        missing = [c for c in self._REQUIRED_COLS if c not in self._df.columns]
+        if missing:
+            raise ValueError(
+                f"Policy file '{pol_file}' is missing required columns: {missing}"
+            )
+
+        self.n_policies = len(self._df)
+        self.batch_size = batch_size
+        self.n_batches = max(1, -(-self.n_policies // batch_size))  # ceiling div
+        self.device = device
+        self.dtype = dtype
+
+    def __iter__(self):
+        return self._generate()
+
+    def _generate(self):
+        """Yield (PolicyBatch, batch_idx, start_row, end_row) for every batch."""
+        for batch_idx in range(self.n_batches):
+            start = batch_idx * self.batch_size
+            end = min(start + self.batch_size, self.n_policies)
+            df = self._df.iloc[start:end]
+
+            def _int(col: str) -> torch.Tensor:
+                return torch.tensor(df[col].values, dtype=torch.int32, device=self.device)
+
+            def _float(col: str) -> torch.Tensor:
+                return torch.tensor(df[col].values, dtype=self.dtype, device=self.device)
+
+            batch = PolicyBatch(
+                policy_id=_int("policy_id"),
+                age_at_entry=_int("age_at_entry"),
+                sex=_int("sex"),
+                pol_term=_int("pol_term"),
+                prem_term=_int("prem_term"),
+                prem_freq=_int("prem_freq"),
+                sum_assd=_float("sum_assd"),
+                db_opt=_int("db_opt"),
+                acp=_float("acp"),
+                atp=_float("atp"),
+                topup_term=_int("topup_term"),
+                topup_freq=_int("topup_freq"),
+                mort_loading=_float("mort_loading"),
+                init_pols_if=_float("init_pols_if"),
+            )
+
+            yield batch, batch_idx, start, end
+
+
 def load_model_inputs(config) -> tuple[PolicyBatch, ParamTables]:
     """Convenience function: load both policies and param tables."""
     dtype = torch.float64 if config.float_precision == "float64" else torch.float32
