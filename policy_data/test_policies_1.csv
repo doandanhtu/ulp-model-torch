@@ -1,0 +1,2 @@
+policy_id,age_at_entry,sex,pol_term,prem_term,prem_freq,sum_assd,db_opt,acp,atp,topup_term,topup_freq,mort_loading,init_pols_if
+1,4,0,88,88,12,30000000000,1,100000000,0,0,12,0,1

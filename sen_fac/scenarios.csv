@@ -1,0 +1,2 @@
+scenario_id,scenario_name,annual_return,volatility,description
+1,Base Case,0.06,0.12,Default scenario with base case assumptions

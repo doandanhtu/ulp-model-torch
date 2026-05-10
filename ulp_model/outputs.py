@@ -47,12 +47,26 @@ def compute_ape(policies: PolicyBatch) -> float:
 
 def print_metrics(
     summary_data: dict,
-    policies: PolicyBatch,
     scenario_id: int,
     elapsed_time: float,
+    policies: "PolicyBatch | None" = None,
+    ape: "float | None" = None,
 ) -> None:
-    """Print a concise summary of key projection metrics."""
-    ape = compute_ape(policies)
+    """Print a concise summary of key projection metrics.
+ 
+    Parameters
+    ----------
+    summary_data  : portfolio-level summary dict (keys -> [T] tensors)
+    scenario_id   : integer scenario label for the header line
+    elapsed_time  : wall-clock seconds to display
+    policies      : PolicyBatch -- used to compute APE when ape is not supplied
+    ape           : pre-computed APE float (from run_portfolio); if given,
+                    policies is not needed and may be None
+    """
+    if ape is None:
+        if policies is None:
+            raise ValueError("Either 'ape' or 'policies' must be supplied to print_metrics.")
+        ape = compute_ape(policies)
 
     # Scalar metrics: value at t=0 (or sum across all months)
     def _t0(key: str) -> float:
