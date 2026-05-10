@@ -39,7 +39,7 @@ output_dir: ./results/test_summary_1                 # Directory where output fi
 output_mode: summary
 # Options:
 #   summary     - one aggregated time-series CSV per scenario (fastest)
-#   per_policy  - per-policy scalar outputs + first 24 months of key time series
+#   per_policy  - per-policy outputs written to separate files (slowest, but most detailed)
 #   both        - summary + per_policy
 
 # Subset of time steps to include in output (summary mode only)

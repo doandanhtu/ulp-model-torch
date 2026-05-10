@@ -96,7 +96,44 @@ def main() -> int:
     print()
 
     # ------------------------------------------------------------------
-     # Run model (always batched; single batch when n_policies <= batch_size)
+    # Pre-flight checks for per-policy output mode
+    # ------------------------------------------------------------------
+    if config.output_mode in ("per_policy", "both"):
+        from ulp_model.loader import PolicyBatchIterator
+        import torch
+
+        iterator = PolicyBatchIterator(
+            config,
+            config.batch_size,
+            torch.device(config.compute_device),
+            torch.float64 if config.float_precision == "float64" else torch.float32,
+        )
+
+        # Excel-friendly size validation
+        excel_max_rows = 1_000_000
+        max_rows = iterator.n_policies * config.MAX_PROJ_MONTHS
+        if max_rows > excel_max_rows:
+            print(
+                f"\n[ERROR] Per-policy output size exceeds Excel capacity:"
+                f"\n  Total rows = {iterator.n_policies:,} policies × {config.MAX_PROJ_MONTHS} months = {max_rows:,} rows"
+                f"\n  Excel limit = {excel_max_rows:,} rows"
+                f"\n  Required max policies = {excel_max_rows // config.MAX_PROJ_MONTHS:,} (for {config.MAX_PROJ_YEARS} year projection)"
+                f"\n  TERMINATING: Reduce n_policies or use output_mode='summary' for large portfolios.\n"
+            )
+            return 1
+
+        if iterator.n_batches > 1:
+            print(
+                f"\n[ERROR] Per-policy output not supported for multi-batch portfolios:"
+                f"\n  Current batches: {iterator.n_batches} batches"
+                f"\n  Policies: {iterator.n_policies:,}"
+                f"\n  Batch size: {config.batch_size:,}"
+                f"\n  TERMINATING: Increase batch_size to >= {iterator.n_policies:,} or use output_mode='summary'.\n"
+            )
+            return 1
+
+    # ------------------------------------------------------------------
+    # Run model (always batched; single batch when n_policies <= batch_size)
     # ------------------------------------------------------------------
     from ulp_model.model import ULPModel
     from ulp_model.outputs import print_metrics, write_summary_outputs
@@ -135,9 +172,9 @@ def main() -> int:
     if config.output_mode in ("per_policy", "both"):
         # Per-policy output requires the raw [B, T] tensors which are not
         # retained by run_portfolio (by design, to bound GPU memory).
-        # This mode is only feasible when the entire portfolio fits in one
-        # batch (n_policies <= batch_size).  Raise a clear error otherwise.
-        from ulp_model.loader import PolicyBatchIterator
+        # Pre-flight checks have already validated Excel limits and single-batch requirement.
+        from ulp_model.loader import PolicyBatchIterator, load_param_tables
+        from ulp_model.outputs import write_per_policy_outputs
         import torch
  
         iterator = PolicyBatchIterator(
@@ -146,36 +183,27 @@ def main() -> int:
             torch.device(config.compute_device),
             torch.float64 if config.float_precision == "float64" else torch.float32,
         )
-        if iterator.n_batches > 1:
-            print(
-                f"[WARNING] output_mode='per_policy' is not supported when the portfolio "
-                f"spans multiple batches ({iterator.n_batches} batches for "
-                f"{iterator.n_policies:,} policies at batch_size={config.batch_size:,}). "
-                f"Increase batch_size to >= {iterator.n_policies:,} or switch to "
-                f"output_mode='summary'."
+        
+        param_tables = load_param_tables(config)
+        # Single batch (pre-validated): re-run with full [B, T] retention to obtain
+        # per-policy tensors for CSV output
+        for policies, _idx, _s, _e in iterator:
+            single_result = model.run(
+                policies, param_tables,
+                retain_full_outputs=True,
             )
-        else:
-            from ulp_model.loader import load_param_tables
-            from ulp_model.outputs import write_per_policy_outputs
- 
-            param_tables = load_param_tables(config)
-            # Single batch: re-run with full [B, T] retention to obtain
-            # per-policy tensors for CSV output
-            for policies, _idx, _s, _e in iterator:
-                single_result = model.run(
-                    policies, param_tables,
-                    retain_full_outputs=True,
-                )
-                write_per_policy_outputs(
-                    single_result["part1"],
-                    single_result["part2"],
-                    single_result["part3"],
-                    policies.policy_id,
-                    scenario_id=1,
-                    output_dir=config.output_dir,
-                    output_batch_size=config.output_batch_size,
-                )
-                print(f"  Per-policy output -> {config.output_dir}/per_policy_scen*.csv")
+            # Get summary variable order: Part 2 then Part 3
+            summary_keys = list(single_result["part2"].keys()) + list(single_result["part3"].keys())
+            write_per_policy_outputs(
+                single_result["part2"],
+                single_result["part3"],
+                policies.policy_id,
+                summary_keys,
+                scenario_id=1,
+                output_dir=config.output_dir,
+                n_scenarios=1,
+            )
+            print(f"  Per-policy output → {config.output_dir}/per_policy_scen1.csv")
  
     return 0
 
