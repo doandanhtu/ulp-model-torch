@@ -128,7 +128,7 @@ def write_summary_outputs(
     fname = out_path / f"summary_scen{scenario_id:0{n_digits}d}.csv"
 
     # Preserve the order of summary variables as provided by the model
-    # pipeline / specification, rather than sorting alphabetically.
+    # specification, rather than sorting alphabetically.
     keys = list(summary_data.keys())
     T = max(v.shape[0] for v in summary_data.values() if hasattr(v, "shape"))
 
