@@ -22,21 +22,21 @@ output_batch_size: 1000     # Policies per per-policy output file (output_mode: 
 # -----------------------------------------------------------------------------
 # Input paths
 # -----------------------------------------------------------------------------
-policy_inputs_file: ./policy_data/test_policies_500000.parquet    # Policy input file (.csv or .parquet)
+policy_inputs_file: ./policy_data/test_policies_20.csv    # Policy input file (.csv or .parquet)
 param_tables_dir: ./param_tables/                   # Directory containing parameter table CSVs and scalar_inputs.yaml
 
 # -----------------------------------------------------------------------------
 # Stochastic / scenario settings
 # -----------------------------------------------------------------------------
-scenario_file: ./sen_fac/scenarios.csv   # CSV with one scenario per row (investment return assumptions)
+scenario_file: ./sen_fac/scenarios_3.csv   # CSV with one scenario per row (investment return assumptions)
 n_simulations: 5000              # Number of Monte Carlo simulations (stochastic mode only)
 
 # -----------------------------------------------------------------------------
 # Output settings
 # -----------------------------------------------------------------------------
-output_dir: ./results/test_summary_1                 # Directory where output files are written
+output_dir: ./results/test_6_pp                 # Directory where output files are written
 
-output_mode: summary
+output_mode: per_policy
 # Options:
 #   summary     - one aggregated time-series CSV per scenario (fastest)
 #   per_policy  - per-policy outputs written to separate files (slowest, but most detailed)
@@ -46,11 +46,16 @@ output_mode: summary
 # Options: all  |  a YAML list of integer month indices, e.g. [0, 12, 24, 60, 120, 240]
 output_time_steps: all
 
-# Extra variables to include beyond the default output set (null = defaults only)
+# Extra variables to include beyond the default output set (null = defaults only), only for per_policy results
 # Provide as a list of variable names from the Part 1/2/3 output dicts, e.g.:
 #   additional_output_vars:
 #     - bav_ab
 #     - g_bav_ab
-additional_output_vars: null # ["av_bd", "av_ad", "av_bval_bb", "av_ab"]
+# Can be either:
+#  - a YAML list of variable names, e.g. ["av_ad", "av_ab"]
+#  - the string "all" to include all available variables from the output dicts (59 variables - not recommended for large outputs)
+#  - null to include only the default output variables (the summary variables similar to those in the summary output)
+additional_output_vars: null # ["av_ad", "av_ab"]
+
 
 

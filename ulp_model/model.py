@@ -180,7 +180,7 @@ class ULPModel:
     # Portfolio (batched) entry point
     # -----------------------------------------------------------------------
 
-    def run_portfolio(self, retain_full_outputs: bool = False) -> dict:
+    def run_portfolio(self, retain_full_outputs: bool = False, param_tables=None) -> dict:
         """Run the model over all policies using batched iteration.
 
         Policies are loaded and processed in chunks of config.batch_size.
@@ -211,7 +211,8 @@ class ULPModel:
         from .outputs import compute_ape
 
         batch_size = self.config.batch_size
-        param_tables = load_param_tables(self.config)
+        if param_tables is None:
+            param_tables = load_param_tables(self.config)
         iterator = PolicyBatchIterator(self.config, batch_size, self.device, self.dtype)
 
         print(
