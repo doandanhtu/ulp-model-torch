@@ -4,9 +4,7 @@ outputs.py - Output writing and reporting utilities for ULP model.
 from __future__ import annotations
 
 import math
-import os
 from pathlib import Path
-from typing import Optional
 
 import torch
 
@@ -45,6 +43,35 @@ def compute_ape(policies: PolicyBatch) -> float:
 # Console metrics
 # ---------------------------------------------------------------------------
 
+def compute_metrics(summary_data: dict, ape: float) -> dict[str, float]:
+    """Compute metrics used by console and summary reporting."""
+    def _t0(key: str) -> float:
+        if key in summary_data:
+            v = summary_data[key]
+            return float(v[0]) if v.ndim >= 1 else float(v)
+        return float("nan")
+
+    def _total(key: str) -> float:
+        if key in summary_data:
+            return float(summary_data[key].sum())
+        return float("nan")
+
+    pv_cf = _t0("pv_cf_after_scr")
+    pv_prem = _t0("pv_prem_inc")
+    # total_prem = _total("prem_inc_if")
+    # total_death = _total("death_outgo")
+    # total_surr = _total("surr_outgo")
+
+    pvcf_over_ape = pv_cf / ape if ape != 0.0 else float("nan")
+    pvcf_over_pv_prem = pv_cf / pv_prem if pv_prem != 0.0 and math.isfinite(pv_prem) else float("nan")
+    return {
+        "pv_cf": pv_cf,
+        "pv_prem": pv_prem,
+        "pvcf_over_ape": pvcf_over_ape,
+        "pvcf_over_pv_prem": pvcf_over_pv_prem,
+    }
+
+
 def print_metrics(
     summary_data: dict,
     scenario_id: int,
@@ -68,23 +95,12 @@ def print_metrics(
             raise ValueError("Either 'ape' or 'policies' must be supplied to print_metrics.")
         ape = compute_ape(policies)
 
-    # Scalar metrics: value at t=0 (or sum across all months)
-    def _t0(key: str) -> float:
-        if key in summary_data:
-            v = summary_data[key]
-            return float(v[0]) if v.ndim >= 1 else float(v)
-        return float("nan")
+    metrics = compute_metrics(summary_data, ape)
 
-    def _total(key: str) -> float:
-        if key in summary_data:
-            return float(summary_data[key].sum())
-        return float("nan")
-
-    pv_cf = _t0("pv_cf_after_scr")
-    pv_prem = _t0("pv_prem_inc")
-    # total_prem = _total("prem_inc_if")
-    # total_death = _total("death_outgo")
-    # total_surr = _total("surr_outgo")
+    pv_cf = metrics["pv_cf"]
+    pv_prem = metrics["pv_prem"]
+    pvcf_over_ape = metrics["pvcf_over_ape"]
+    pvcf_over_pv_prem = metrics["pvcf_over_pv_prem"]
 
     print(f"\n{'='*60}")
     print(f" Scenario {scenario_id:>4d} | Elapsed: {elapsed_time:.2f}s")
@@ -92,13 +108,11 @@ def print_metrics(
     print(f"  APE                : {ape:>20,.0f}")
     print(f"  PV Cashflow (t=0)  : {pv_cf:>20,.0f}")
     print(f"  PV Prem Inc (t=0)  : {pv_prem:>20,.0f}")
+    print(f"  PV CF / APE        : {pvcf_over_ape:>20.4f}")
+    print(f"  PV CF / PV Prem    : {pvcf_over_pv_prem:>20.4f}")
     # print(f"  Total Prem Inc     : {total_prem:>20,.0f}")
     # print(f"  Total Death Outgo  : {total_death:>20,.0f}")
     # print(f"  Total Surr Outgo   : {total_surr:>20,.0f}")
-    if pv_prem != 0.0 and not math.isnan(pv_prem):
-        vif_over_ape = pv_cf / ape if ape != 0.0 else float("nan")
-        print(f"  VIF / APE          : {vif_over_ape:>20.4f}")
-        print(f"  VIF / PV Prem Inc  : {(pv_cf / pv_prem):>20.4f}")
     print(f"{'='*60}\n")
 
 
@@ -127,8 +141,6 @@ def write_summary_outputs(
     n_digits = len(str(n_scenarios))
     fname = out_path / f"summary_scen{scenario_id:0{n_digits}d}.csv"
 
-    # Preserve the order of summary variables as provided by the model
-    # specification, rather than sorting alphabetically.
     keys = list(summary_data.keys())
     T = max(v.shape[0] for v in summary_data.values() if hasattr(v, "shape"))
 
@@ -148,25 +160,23 @@ def write_summary_outputs(
 # ---------------------------------------------------------------------------
 
 def write_per_policy_outputs(
-    part2: dict,
-    part3: dict,
+    all_outputs: dict,
     policy_ids: torch.Tensor,
-    summary_keys: list[str],
+    output_keys: list[str],
     scenario_id: int,
     output_dir: str,
     n_scenarios: int = 1,
 ) -> None:
-    """Write per-policy outputs to a single CSV file in summary format.
+    """Write per-policy outputs to a single CSV file.
 
-    Format: policy_id, t, then all variables (in summary order).
-    Each policy has MAX_PROJ_MONTHS rows (one per time step).
+    Format: policy_id, t, then all output_keys variables.
+    Each policy has T rows (one per time step).
 
     Parameters
     ----------
-    part2           : Part 2 outputs dict {key: [B, T] tensor}
-    part3           : Part 3 outputs dict {key: [B, T] tensor}
+    all_outputs     : merged dict of all part outputs {key: [B, T] tensor}
     policy_ids      : [B] tensor of policy IDs
-    summary_keys    : ordered list of variable names to write
+    output_keys     : ordered list of variable names to write
     scenario_id     : integer scenario identifier
     output_dir      : directory path for output files
     n_scenarios     : total number of scenarios (used for file naming)
@@ -178,24 +188,20 @@ def write_per_policy_outputs(
     fname = out_path / f"per_policy_scen{scenario_id:0{n_digits}d}.csv"
 
     B = policy_ids.shape[0]
-    # Merge part2 and part3 for easy key lookup
-    all_outputs = {**part2, **part3}
-    T = max(v.shape[1] for v in all_outputs.values() if hasattr(v, "shape"))
+    T = max(v.shape[1] for v in all_outputs.values() if hasattr(v, "shape") and v.ndim == 2)
 
     with open(fname, "w", newline="", encoding="utf-8") as f:
-        # Header: policy_id, t, then all summary variables
-        header = ["policy_id", "t"] + summary_keys
+        header = ["policy_id", "t"] + output_keys
         f.write(",".join(header) + "\n")
 
-        # Write data: one row per (policy, time step)
         for b in range(B):
             pid = int(policy_ids[b])
             for t in range(T):
                 row = [str(pid), str(t)]
-                for k in summary_keys:
+                for k in output_keys:
                     if k in all_outputs:
                         v = all_outputs[k]
-                        if t < v.shape[1]:
+                        if v.ndim == 2 and t < v.shape[1]:
                             row.append(f"{float(v[b, t]):.6f}")
                         else:
                             row.append("0")
