@@ -314,6 +314,8 @@ The table holds all these sensitivity factors will look like this:
 
 Scenario 1 should always be the base scenario, where all these factors do not impact the calculation.
 
+**Note that:** in the implementation, sensitivity factors are applied to assumption parameters BEFORE model execution. This architecture keeps calculation formulas clean and unchanged while allowing flexible sensitivity analysis.
+
 ### Stochastic mode
 
 In stochastic mode, the following rate assumptions vary across both time steps and simulations as outputs of the economic scenario generator: 

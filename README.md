@@ -2,6 +2,8 @@
 
 PyTorch implementation of Universal Life Policy (ULP) cash flow projections, designed for large portfolios with GPU acceleration.
 
+For background and motivation, see [About this project](docs/about.md).
+
 > **Disclaimer:** This is an individual personal project. All policy inputs, parameter tables, and assumptions included in this repository are fabricated for illustration purposes only. This project does not represent the practices, methodologies, or views of any organisation.
 
 ## Status
@@ -55,6 +57,29 @@ python run_model.py --config config.yaml --device cuda --mode summary
 
 ---
 
+## Performance
+| Number of model points | Excel Python Orchestration | Prophet | PyTorch CPU | GTX 1060 6GB | T4 15GB | A100 40GB | A100 80GB | RTX Pro 6000 Blackwell Server Edition 96GB |
+|---|---|---|---|---|---|---|---|---|
+| 0.5m | 20,617s | 2,128s | 244s | 120s | 47s | 17s | 11s | 8.5s |
+| 3m | — | — | 1,132s | 650s | 252s | 68s | 47s | 35s |
+| 5m | — | — | — | 1,035s | 421s | 116s | 76s | 59s |
+| 10m | — | — | — | — | 834s | 221s | 151s | 119s |
+
+<details>
+<summary>Benchmark notes</summary>
+
+- All figures in the table are measured runtimes, not projections or extrapolations.
+- Excel Python Orchestration refers to an Excel-based actuarial model orchestrated through Python to process multiple Excel instances in parallel.
+- Prophet benchmark is based on a standard run without MPF batching, which was not available in the tested setup.
+- Excel, Prophet, and PyTorch CPU benchmarks were run on Intel i7-14700 with 32GB RAM.
+- GTX 1060 6GB is a local consumer GPU.
+- T4, A100, and RTX Pro 6000 Blackwell Server Edition 96GB (G4) results were tested through Google Colab GPU environments using Colab Pro subscription.
+- The purpose of the benchmark is not to claim optimal performance, but to demonstrate practical viability and accessibility of GPU-native actuarial modeling using modern open-source tooling.
+
+</details>
+
+---
+
 ## Architecture
 
 ### Module map
@@ -76,6 +101,8 @@ python run_model.py --config config.yaml --device cuda --mode summary
 All runtime configuration lives in [`config.yaml`](config.yaml) — see the Configuration section below for the full parameter reference.
 
 ### Computation structure
+
+At a high level, the model treats millions of policies as large tensor operations evolving simultaneously across projection months, rather than iterating policy-by-policy in nested loops.
 
 The model follows the three-part dependency chain specified in the model specification:
 
