@@ -1,8 +1,8 @@
-# GPU-Accelerated Actuarial Modelling: A Personal Experiment
+# GPU-Accelerated Actuarial Modelling
 
-**From Excel to GPU: Rebuilding Actuarial Cashflow Models in PyTorch**
+**From Excel to GPU: Building Actuarial Cashflow Models in PyTorch**
 
-I have built a GPU-accelerated actuarial cashflow model in Python/PyTorch as a personal project.
+I recently built a GPU-accelerated actuarial cashflow model in Python/PyTorch as a personal project.
 
 It is a deterministic model that performs monthly Universal Life policy cashflow projections using vectorized tensors, tested across projection horizons of up to 90 years.
 
