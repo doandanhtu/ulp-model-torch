@@ -22,21 +22,21 @@ output_batch_size: 1000     # Policies per per-policy output file (output_mode: 
 # -----------------------------------------------------------------------------
 # Input paths
 # -----------------------------------------------------------------------------
-policy_inputs_file: ./policy_data/test_policies_20.csv    # Policy input file (.csv or .parquet)
+policy_inputs_file: ./policy_data/test_policies_5m.parquet    # Policy input file (.csv or .parquet)
 param_tables_dir: ./param_tables/                   # Directory containing parameter table CSVs and scalar_inputs.yaml
 
 # -----------------------------------------------------------------------------
 # Stochastic / scenario settings
 # -----------------------------------------------------------------------------
-scenario_file: ./sen_fac/scenarios_3.csv   # CSV with one scenario per row (investment return assumptions)
+scenario_file: ./sen_fac/base_scen.csv   # CSV with one scenario per row (investment return assumptions)
 n_simulations: 5000              # Number of Monte Carlo simulations (stochastic mode only)
 
 # -----------------------------------------------------------------------------
 # Output settings
 # -----------------------------------------------------------------------------
-output_dir: ./results/test_6_pp                 # Directory where output files are written
+output_dir: ./results/test_1                 # Directory where output files are written
 
-output_mode: per_policy
+output_mode: summary
 # Options:
 #   summary     - one aggregated time-series CSV per scenario (fastest)
 #   per_policy  - per-policy outputs written to separate files (slowest, but most detailed)
