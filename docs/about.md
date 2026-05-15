@@ -9,7 +9,7 @@ It is a deterministic model that performs monthly Universal Life policy cashflow
 Here are the runtime numbers:
 
 | Number of model points | Excel Python Orchestration | Prophet | PyTorch CPU | GTX 1060 6GB | T4 15GB | A100 40GB | A100 80GB | RTX Pro 6000 Blackwell Server Edition 96GB |
-|---|---|---|---|---|---|---|---|---|
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 0.5m | 20,617s | 2,128s | 244s | 120s | 47s | 17s | 11s | 8.5s |
 | 3m | — | — | 1,132s | 650s | 252s | 68s | 47s | 35s |
 | 5m | — | — | — | 1,035s | 421s | 116s | 76s | 59s |
