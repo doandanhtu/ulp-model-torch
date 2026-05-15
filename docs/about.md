@@ -1,6 +1,4 @@
-# GPU-Accelerated Actuarial Modelling
-
-**From Excel to GPU: Building Actuarial Cashflow Models in PyTorch**
+# From Excel to GPU: Actuarial Cashflow Models in PyTorch
 
 I recently built a GPU-accelerated actuarial cashflow model in Python/PyTorch as a personal project.
 
