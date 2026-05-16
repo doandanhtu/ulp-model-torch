@@ -56,7 +56,7 @@ In practice, this may allow actuarial infrastructure to evolve more similarly to
 
 ## Why now?
 
-What makes this time a particularly good moment for that leap is the combination of:
+What makes this time a particularly good moment for the leap is the combination of:
 
 - increasingly accessible modern GPU infrastructure,
 - mature high-level frameworks like PyTorch,
