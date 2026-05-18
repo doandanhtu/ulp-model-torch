@@ -1,10 +1,10 @@
 # From Excel to GPU: An Actuarial Cashflow Model in PyTorch
 
-I recently built a GPU-accelerated actuarial cashflow model in Python/PyTorch as a personal project.
+⚡ 10 million model points. Monthly cashflows. 90-year horizon. Under 2 minutes on a single GPU.
 
-It is a deterministic model that performs monthly Universal Life policy cashflow projections using vectorized tensors, tested across projection horizons of up to 90 years.
+That's the runtime for a Universal Life cashflow model I built in Python/PyTorch over a few weekends as a personal experiment. What follows is a write-up of the benchmarks, the build, and what I took away from the process.
 
-Here are the runtime numbers:
+Full runtime numbers across compute platforms are shown below.
 
 | Number of model points | Excel Python Orchestration | Prophet | PyTorch CPU | GTX 1060 6GB | T4 15GB | A100 40GB | A100 80GB | RTX Pro 6000 Blackwell Server Edition 96GB |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
