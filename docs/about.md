@@ -15,9 +15,11 @@ Full runtime numbers across compute platforms are shown below.
 
 *Refer to benchmark notes at the end for more information.*
 
-What surprised me the most was not just the runtime, but how straightforward the implementation was.
+But the most interesting part wasn't the runtime.
 
-The entire prototype, from specification to implementation and testing, took roughly 48 hours of focused work in total, spread across spare time evenings and weekends over several weeks. Roughly half of the time went into drafting the model specification document. The implementation and testing took only around 3 working days, supported by Claude and Claude Code, despite my background being actuarial rather than computer science or software engineering.
+It was how accessible the stack has become.
+
+The entire prototype, from specification to implementation and testing, took approximately 48 hours of focused work in total, spread across spare time evenings and weekends over several weeks. Roughly half of the time went into drafting the model specification document. The implementation and testing took only around 3 working days, supported by Claude and Claude Code, despite my background being actuarial rather than computer science or software engineering.
 
 What was built in that time is not a trivial model. It can support:
 
