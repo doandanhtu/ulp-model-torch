@@ -4,7 +4,7 @@ PyTorch implementation of Universal Life Policy (ULP) cash flow projections, des
 
 For background and motivation, see [About this project](docs/about.md).
 
-> **Disclaimer:** This is an individual personal project. All policy inputs, parameter tables, and assumptions included in this repository are fabricated for illustration purposes only. This project does not represent the practices, methodologies, or views of any organisation.
+> **Disclaimer:** This is a personal project. All policy inputs, parameter tables, and assumptions included in this repository are fabricated for illustration purposes only. This project does not represent the practices, methodologies, or views of any organisation.
 
 ## Status
 
